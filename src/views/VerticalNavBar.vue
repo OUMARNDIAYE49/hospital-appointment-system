@@ -22,6 +22,11 @@
         </router-link>
       </li>
       <li>
+        <router-link to="/admin/specialties" @click="setHorizontalMenu">
+          <font-awesome-icon icon="stethoscope" /> Gestion des Spécialités
+        </router-link>
+      </li>
+      <li>
         <router-link to="/login" @click="setHorizontalMenu">
           <font-awesome-icon icon="sign-out-alt" /> Déconnecter
         </router-link>

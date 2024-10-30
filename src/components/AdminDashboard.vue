@@ -2,14 +2,14 @@
   <div class="admin-dashboard">
     <h1>Tableau de Bord - Administrateur</h1>
 
-    <!-- Conteneur du champ de recherche placé juste au-dessus du tableau -->
-    <div class="search-container">
-      <label for="search-date">Rechercher par date :</label>
-      <input type="date" id="search-date" v-model="searchDate" class="form-control search-input" />
-    </div>
-
     <div class="table-responsive">
-      <table class="table table-bordered text-center">
+      <!-- Barre de recherche par date -->
+      <div class="search-bar">
+        <label for="search-date">Rechercher par date :</label>
+        <input type="date" id="search-date" v-model="searchDate" @input="filterAppointments" />
+      </div>
+
+      <table class="table table-hover table-bordered text-center">
         <thead>
           <tr>
             <th>Nom du Patient</th>
@@ -30,13 +30,80 @@
             <td>{{ appointment.specialty }}</td>
             <td>{{ appointment.address }}</td>
             <td>
-              <font-awesome-icon @click="viewAppointment(appointment.id)" icon="eye" class="text-info mx-2" />
-              <font-awesome-icon @click="editAppointment(appointment.id)" icon="pen" class="text-warning mx-2" />
-              <font-awesome-icon @click="deleteAppointment(appointment.id)" icon="trash" class="text-danger mx-2" />
+              <font-awesome-icon @click="viewAppointment(appointment)" icon="eye" class="action-icon text-info" />
+              <font-awesome-icon @click="editAppointment(appointment)" icon="pen" class="action-icon text-warning" />
+              <font-awesome-icon @click="deleteAppointment(appointment.id)" icon="trash" class="action-icon text-danger" />
             </td>
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Modal pour afficher les détails du rendez-vous -->
+    <div v-if="showModal && !editMode" class="modal" tabindex="-1" role="dialog" @click.self="closeModal">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Détails du Rendez-vous</h5>
+            <button type="button" class="close" @click="closeModal">&times;</button>
+          </div>
+          <div class="modal-body">
+            <p><strong>Nom du Patient :</strong> {{ selectedAppointment.patientName }}</p>
+            <p><strong>Téléphone :</strong> {{ selectedAppointment.patientPhone }}</p>
+            <p><strong>Date :</strong> {{ selectedAppointment.date }}</p>
+            <p><strong>Médecin :</strong> {{ selectedAppointment.doctorName }}</p>
+            <p><strong>Spécialité :</strong> {{ selectedAppointment.specialty }}</p>
+            <p><strong>Adresse :</strong> {{ selectedAppointment.address }}</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" @click="closeModal">Fermer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal pour modifier le rendez-vous -->
+    <div v-if="showModal && editMode" class="modal" tabindex="-1" role="dialog" @click.self="closeModal">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Modifier le Rendez-vous</h5>
+            <button type="button" class="close" @click="closeModal">&times;</button>
+          </div>
+          <div class="modal-body">
+            <form @submit.prevent="saveEdit">
+              <div class="form-group">
+                <label>Nom du Patient</label>
+                <input v-model="selectedAppointment.patientName" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label>Téléphone</label>
+                <input v-model="selectedAppointment.patientPhone" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label>Date</label>
+                <input type="date" v-model="selectedAppointment.date" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label>Médecin</label>
+                <input v-model="selectedAppointment.doctorName" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label>Spécialité</label>
+                <input v-model="selectedAppointment.specialty" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label>Adresse</label>
+                <input v-model="selectedAppointment.address" class="form-control" required />
+              </div>
+              <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Enregistrer</button>
+                <button type="button" class="btn btn-secondary" @click="closeModal">Annuler</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -45,54 +112,55 @@
 export default {
   data() {
     return {
-      searchDate: '', // Pour stocker la date de recherche
+      searchDate: '',
       appointments: [
-        {
-          id: 1,
-          patientName: 'Jean Dupont',
-          patientPhone: '0601020304',
-          date: '2024-10-10 02:30',
-          doctorName: 'Dr. Martin',
-          specialty: 'Dentiste', // Ajout de la spécialité
-          address: '10 Rue de la Santé, Paris', // Ajout de l'adresse
-        },
-        {
-          id: 2,
-          patientName: 'Marie Curie',
-          patientPhone: '0654321098',
-          date: '2024-11-01 01:05',
-          doctorName: 'Dr. Moreau',
-          specialty: 'Cardiologue', // Ajout de la spécialité
-          address: '20 Avenue , Paris', // Ajout de l'adresse
-        },
-        // Autres rendez-vous
+        { id: 1, patientName: 'Jean Dupont', patientPhone: '0601020304', date: '2024-10-10', doctorName: 'Dr. Martin', specialty: 'Dentiste', address: '10 Rue de la Santé, Paris' },
+        { id: 2, patientName: 'Marie Curie', patientPhone: '0654321098', date: '2024-11-01', doctorName: 'Dr. Moreau', specialty: 'Cardiologue', address: '20 Avenue, Paris' },
       ],
+      filteredAppointments: [],
+      showModal: false,
+      editMode: false,
+      selectedAppointment: {}
     };
   },
-  computed: {
-    // Filtrage des rendez-vous selon la date recherchée
-    filteredAppointments() {
-      if (this.searchDate) {
-        return this.appointments.filter(appointment =>
-          appointment.date === this.searchDate
-        );
-      }
-      return this.appointments;
-    },
+  created() {
+    this.filteredAppointments = this.appointments;
   },
   methods: {
-    viewAppointment(id) {
-      // Logique pour voir le rendez-vous
+    viewAppointment(appointment) {
+      this.selectedAppointment = { ...appointment };
+      this.showModal = true;
+      this.editMode = false;
     },
-    editAppointment(id) {
-      // Logique pour modifier le rendez-vous
+    editAppointment(appointment) {
+      this.selectedAppointment = { ...appointment };
+      this.showModal = true;
+      this.editMode = true;
+    },
+    closeModal() {
+      this.showModal = false;
+      this.selectedAppointment = {};
+    },
+    saveEdit() {
+      const index = this.appointments.findIndex(app => app.id === this.selectedAppointment.id);
+      if (index !== -1) {
+        this.appointments.splice(index, 1, { ...this.selectedAppointment });
+      }
+      this.closeModal();
     },
     deleteAppointment(id) {
-      // Logique pour supprimer le rendez-vous
+      this.appointments = this.appointments.filter(appointment => appointment.id !== id);
     },
-  },
+    filterAppointments() {
+      this.filteredAppointments = this.searchDate
+        ? this.appointments.filter(appointment => appointment.date === this.searchDate)
+        : this.appointments;
+    }
+  }
 };
 </script>
+
+
 
 <style scoped>
 .admin-dashboard {
@@ -102,34 +170,93 @@ export default {
   margin-top: 20px;
 }
 
-.search-container {
-  width: 65%; /* Aligné avec la largeur de la table */
-  display: flex;
-  justify-content: flex-start; /* Aligne le champ à gauche */
-  margin-bottom: 10px; /* Espace en bas du champ de recherche */
-  margin-top: 20px; /* Ajout d'un espace entre le titre et le champ de recherche */
-}
-
-.search-input {
-  width: 200px;
-  margin-left: 10px; /* Ajoute un espace entre le label et le champ */
-}
-
 .table-responsive {
   width: 65%;
   margin-top: 20px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
 }
 
-table {
-  background-color: #fff;
+h1 {
+  margin-bottom: 20px;
+  color: #444;
 }
 
-th, td {
+.search-bar {
+  margin: 20px 0;
+  padding-left: 15px;
+}
+
+.table {
+  background-color: #f9f9f9;
+}
+
+th {
+  background-color: #007bff;
+  color: #fff;
+  padding: 12px;
+  border: none;
+}
+
+td {
+  background-color: #ffffff;
+  padding: 10px;
+  border: none;
   vertical-align: middle;
 }
 
-.mx-2 {
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
+.table-hover tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+.action-icon {
+  cursor: pointer;
+  font-size: 1.2em;
+  margin: 0 5px;
+  transition: transform 0.2s ease;
+}
+
+.action-icon:hover {
+  transform: scale(1.2);
+}
+
+/* Styles pour la modal */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-dialog {
+  max-width: 500px;
+  width: 100%;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  position: relative;
+}
+
+.modal-header, .modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
 }
 </style>

@@ -1,11 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import AdminDashboard from '../components/AdminDashboard.vue';
-import AppointmentForm from '../components/AppointmentForm.vue'; // Assurez-vous que le chemin est correct
+import AppointmentForm from '../components/AppointmentForm.vue';
 import DoctorDashboard from '../components/DoctorDashboard.vue';
 import LoginView from '../views/LoginView.vue';
 import HomeView from '../views/HomeView.vue';
-import DoctorsList from '../views/DoctorsList.vue'; // Nouvelle page des médecins
-import AddDoctor from '../views/AddDoctor.vue'; 
+import DoctorsList from '../views/DoctorsList.vue';
+import AddDoctor from '../views/AddDoctor.vue';
+import SpecialiteList from '../views/SpecialiteList.vue';
+import AddSpecialty from '../views/AddSpecialty.vue'; // Import pour ajouter une spécialité
 
 const routes = [
   {
@@ -27,18 +29,30 @@ const routes = [
   {
     path: '/admin/appointments',
     name: 'AppointmentForm',
-    component: AppointmentForm, // Ce composant doit contenir le formulaire
-    meta: { requiresAuth: true, role: 'admin' }, // Ou tout autre rôle qui peut accéder à ce formulaire
+    component: AppointmentForm,
+    meta: { requiresAuth: true, role: 'admin' },
   },
   {
     path: '/admin/doctors',
     name: 'Doctors',
-    component: DoctorsList, // Route pour la page des médecins
+    component: DoctorsList,
   },
   {
     path: '/admin/doctors/add',
     name: 'AddDoctor',
-    component: AddDoctor, // Ou utilisez la méthode d'importation dynamique
+    component: AddDoctor,
+  },
+  {
+    path: '/admin/specialties',
+    name: 'Specialties',
+    component: SpecialiteList,
+    meta: { requiresAuth: true, role: 'admin' },
+  },
+  {
+    path: '/admin/specialties/add', // Nouvelle route pour ajouter une spécialité
+    name: 'AddSpecialty',
+    component: AddSpecialty, // Le composant de formulaire d'ajout de spécialité
+    meta: { requiresAuth: true, role: 'admin' },
   },
   {
     path: '/doctor',
