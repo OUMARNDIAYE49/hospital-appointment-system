@@ -109,58 +109,89 @@
 </template>
 
 <script>
+import { ref, computed, onMounted } from 'vue';
+import { useAppointmentStore } from '@/store/appointmentStore';
+import { usePatientStore } from '@/store/patientStore';
+import { useSpecialiteStore } from '@/store/specialityStore'; // Assurez-vous que ce chemin est correct
+// import { useUserStore } from '@/store/userStore';
+import { useRouter } from 'vue-router';
+
 export default {
-  data() {
-    return {
-      searchDate: '',
-      appointments: [
-        { id: 1, patientName: 'Jean Dupont', patientPhone: '0601020304', date: '2024-10-10', doctorName: 'Dr. Martin', specialty: 'Dentiste', address: '10 Rue de la Santé, Paris' },
-        { id: 2, patientName: 'Marie Curie', patientPhone: '0654321098', date: '2024-11-01', doctorName: 'Dr. Moreau', specialty: 'Cardiologue', address: '20 Avenue, Paris' },
-      ],
-      filteredAppointments: [],
-      showModal: false,
-      editMode: false,
-      selectedAppointment: {}
+  setup() {
+    const appointmentStore = useAppointmentStore();
+    const patientStore = usePatientStore();
+    const specialityStore = useSpecialiteStore();
+    const userStore = useUserStore();
+    const router = useRouter();
+
+    const showModal = ref(false);
+    const editMode = ref(false);
+    const selectedAppointment = ref({});
+    const searchDate = ref('');
+
+    const filteredAppointments = computed(() => {
+      return appointmentStore.appointments.filter(appointment => 
+        appointment.date === searchDate.value || !searchDate.value
+      );
+    });
+
+    const filterAppointments = () => {
+      // Update filtered appointments based on the search date
+      filteredAppointments.value;
     };
-  },
-  created() {
-    this.filteredAppointments = this.appointments;
-  },
-  methods: {
-    viewAppointment(appointment) {
-      this.selectedAppointment = { ...appointment };
-      this.showModal = true;
-      this.editMode = false;
-    },
-    editAppointment(appointment) {
-      this.selectedAppointment = { ...appointment };
-      this.showModal = true;
-      this.editMode = true;
-    },
-    closeModal() {
-      this.showModal = false;
-      this.selectedAppointment = {};
-    },
-    saveEdit() {
-      const index = this.appointments.findIndex(app => app.id === this.selectedAppointment.id);
+
+    const viewAppointment = (appointment) => {
+      selectedAppointment.value = { ...appointment };
+      showModal.value = true;
+      editMode.value = false;
+    };
+
+    const editAppointment = (appointment) => {
+      selectedAppointment.value = { ...appointment };
+      showModal.value = true;
+      editMode.value = true;
+    };
+
+    const closeModal = () => {
+      showModal.value = false;
+      selectedAppointment.value = {};
+    };
+
+    const saveEdit = () => {
+      const index = appointmentStore.appointments.findIndex(app => app.id === selectedAppointment.value.id);
       if (index !== -1) {
-        this.appointments.splice(index, 1, { ...this.selectedAppointment });
+        appointmentStore.appointments.splice(index, 1, { ...selectedAppointment.value });
       }
-      this.closeModal();
-    },
-    deleteAppointment(id) {
-      this.appointments = this.appointments.filter(appointment => appointment.id !== id);
-    },
-    filterAppointments() {
-      this.filteredAppointments = this.searchDate
-        ? this.appointments.filter(appointment => appointment.date === this.searchDate)
-        : this.appointments;
-    }
+      closeModal();
+    };
+
+    const deleteAppointment = (id) => {
+      appointmentStore.appointments = appointmentStore.appointments.filter(appointment => appointment.id !== id);
+    };
+
+    onMounted(async () => {
+      await appointmentStore.loadAppointments(); // Assurez-vous d'avoir une méthode pour charger les rendez-vous
+      await patientStore.loadPatients(); // Charger les patients si nécessaire
+      await specialityStore.loadSpecialites(); // Charger les spécialités si nécessaire
+      await userStore.loadUsers(); // Charger les utilisateurs si nécessaire
+    });
+
+    return {
+      searchDate,
+      filteredAppointments,
+      showModal,
+      editMode,
+      selectedAppointment,
+      viewAppointment,
+      editAppointment,
+      closeModal,
+      saveEdit,
+      deleteAppointment,
+      filterAppointments,
+    };
   }
 };
 </script>
-
-
 
 <style scoped>
 .admin-dashboard {
@@ -180,45 +211,11 @@ export default {
 
 h1 {
   margin-bottom: 20px;
-  color: #444;
+  color: #343a40;
 }
 
 .search-bar {
-  margin: 20px 0;
-  padding-left: 15px;
-}
-
-.table {
-  background-color: #f9f9f9;
-}
-
-th {
-  background-color: #007bff;
-  color: #fff;
-  padding: 12px;
-  border: none;
-}
-
-td {
-  background-color: #ffffff;
-  padding: 10px;
-  border: none;
-  vertical-align: middle;
-}
-
-.table-hover tbody tr:hover {
-  background-color: #f1f1f1;
-}
-
-.action-icon {
-  cursor: pointer;
-  font-size: 1.2em;
-  margin: 0 5px;
-  transition: transform 0.2s ease;
-}
-
-.action-icon:hover {
-  transform: scale(1.2);
+  margin-bottom: 20px;
 }
 
 /* Styles pour la modal */

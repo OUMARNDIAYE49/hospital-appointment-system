@@ -42,13 +42,12 @@
       <option value="reporté">Reporté</option>
     </select>
 
-    <!-- Remarques -->
-    <!-- <textarea v-model="appointment.notes" placeholder="Remarques"></textarea> -->
-
     <!-- Boutons de soumission et annulation -->
     <div class="form-buttons">
-      <button type="submit">{{ isEditing ? 'Modifier' : 'Ajouter' }}</button>
-      <button type="button" @click="cancel" class="cancel-button ">Annuler</button>
+      <button type="submit" class="button-submit">
+        {{ isEditing ? 'Modifier' : 'Ajouter' }}
+      </button>
+      <button type="button" @click="cancel" class="button-cancel">Annuler</button>
     </div>
   </form>
 </template>
@@ -96,6 +95,9 @@ export default {
     submitForm() {
       this.$emit('submit', this.appointment);
       this.$emit('reset'); // Réinitialise le formulaire après soumission
+
+      // Redirige vers la liste des rendez-vous après l'ajout ou la modification
+      this.$router.push('/admin');
     },
     cancel() {
       this.$emit('reset'); // Action pour annuler et réinitialiser le formulaire
@@ -120,7 +122,6 @@ export default {
 }
 
 .appointment-form input,
-.appointment-form textarea,
 .appointment-form select {
   width: 100%;
   margin-bottom: 15px;
@@ -144,7 +145,8 @@ export default {
   justify-content: space-between;
 }
 
-.appointment-form button {
+/* Style pour le bouton Ajouter/Modifier */
+.button-submit {
   background-color: #007bff;
   color: white;
   padding: 10px;
@@ -154,15 +156,24 @@ export default {
   width: 48%;
 }
 
-.appointment-form button:hover {
+/* Effet hover pour le bouton Ajouter/Modifier */
+.button-submit:hover {
   background-color: #0056b3;
 }
 
-.cancel-button {
+/* Style pour le bouton Annuler */
+.button-cancel {
   background-color: #dc3545;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 48%;
 }
 
-.cancel-button:hover {
+/* Effet hover pour le bouton Annuler */
+.button-cancel:hover {
   background-color: #c82333;
 }
 </style>

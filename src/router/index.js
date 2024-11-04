@@ -1,13 +1,20 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import AdminDashboard from '../components/AdminDashboard.vue';
-import AppointmentForm from '../components/AppointmentForm.vue';
+// import AdminDashboard from '../components/AdminDashboard.vue';
+import AddAppointment from '../views/AddAppointment.vue';
+import AppointmentList from '../views/AppointmentList.vue';
 import DoctorDashboard from '../components/DoctorDashboard.vue';
 import LoginView from '../views/LoginView.vue';
 import HomeView from '../views/HomeView.vue';
 import DoctorsList from '../views/DoctorsList.vue';
 import AddDoctor from '../views/AddDoctor.vue';
 import SpecialiteList from '../views/SpecialiteList.vue';
-import AddSpecialty from '../views/AddSpecialty.vue'; // Import pour ajouter une spécialité
+import AddSpecialty from '../views/AddSpecialty.vue'; 
+import UserList from '../views/UserList.vue';
+import AddUser from '../views/AddUser.vue';  
+import PatientList from '../views/PatientList.vue';  // Composant pour la liste des patients
+import AddPatient from '../views/AddPatient.vue';    // Composant pour l'ajout de patients
+
+
 
 const routes = [
   {
@@ -23,24 +30,25 @@ const routes = [
   {
     path: '/admin',
     name: 'Admin',
-    component: AdminDashboard,
+    component: AppointmentList,
     meta: { requiresAuth: true, role: 'admin' },
   },
   {
-    path: '/admin/appointments',
-    name: 'AppointmentForm',
-    component: AppointmentForm,
+    path: '/admin/appointments/add',
+    name: 'AddAppointment',
+    component: AddAppointment,
     meta: { requiresAuth: true, role: 'admin' },
   },
+  
   {
-    path: '/admin/doctors',
-    name: 'Doctors',
-    component: DoctorsList,
+    path: '/admin/users',
+    name: 'UserList',
+    component: UserList,
   },
   {
-    path: '/admin/doctors/add',
-    name: 'AddDoctor',
-    component: AddDoctor,
+    path: '/admin/users/add',
+    name: 'AddUser',
+    component: AddUser,
   },
   {
     path: '/admin/specialties',
@@ -53,6 +61,18 @@ const routes = [
     name: 'AddSpecialty',
     component: AddSpecialty, // Le composant de formulaire d'ajout de spécialité
     meta: { requiresAuth: true, role: 'admin' },
+  },
+  { 
+    path: '/admin/patients', 
+    name: 'PatientList', 
+    component: PatientList, 
+    meta: { requiresAuth: true, role: 'admin' } 
+  },
+  { 
+    path: '/admin/patients/add', 
+    name: 'AddPatient', 
+    component: AddPatient, 
+    meta: { requiresAuth: true, role: 'admin' } 
   },
   {
     path: '/doctor',

@@ -8,22 +8,23 @@
       </li>
       <li>
         <router-link to="/admin" @click="setVerticalMenu">
-          <font-awesome-icon icon="calendar-check" /> Liste des Rendez-vous
+          <font-awesome-icon icon="calendar-check" /> Rendez-vous
+        </router-link>
+      </li>
+  
+      <li>
+        <router-link to="/admin/users" @click="setHorizontalMenu">
+          <font-awesome-icon icon="user-md" />  Utilisateurs
         </router-link>
       </li>
       <li>
-        <router-link to="/admin/appointments" @click="setHorizontalMenu">
-          <font-awesome-icon icon="calendar-plus" /> Ajouter Rendez-vous
-        </router-link>
-      </li>
-      <li>
-        <router-link to="/admin/doctors" @click="setHorizontalMenu">
-          <font-awesome-icon icon="user-md" /> Gestion des Médecins
+        <router-link to="/admin/patients" @click="setHorizontalMenu">
+          <font-awesome-icon icon="user-md" />  Patients
         </router-link>
       </li>
       <li>
         <router-link to="/admin/specialties" @click="setHorizontalMenu">
-          <font-awesome-icon icon="stethoscope" /> Gestion des Spécialités
+          <font-awesome-icon icon="stethoscope" />  Spécialités
         </router-link>
       </li>
       <li>

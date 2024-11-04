@@ -1,55 +1,73 @@
-import { defineStore } from 'pinia';
-import { fetchAllAppointments, updateAppointmentById, deleteAppointmentById, cancelAppointmentById } from '../services/appointmentService';  // Services API fictifs
+import { defineStore } from "pinia";
+import axios from "axios";
 
-export const useAppointmentStore = defineStore('appointments', {
+export const useAppointmentStore = defineStore("appointment", {
   state: () => ({
     appointments: [],  // Liste des rendez-vous
+    patients: [],
+    utilisateurs: [],  
   }),
+
   actions: {
-    // Récupérer tous les rendez-vous depuis une API ou des données locales
-    async fetchAppointments() {
+    // Charger tous les rendez-vous depuis l'API
+    async loadDataFromApi() {
       try {
-        const data = await fetchAllAppointments();  // Appel API pour récupérer les rendez-vous
-        this.appointments = data;  // Met à jour l'état avec les rendez-vous récupérés
+        const response = await axios.get("http://localhost:3000/api/rendezvous");
+        this.appointments = response.data;
       } catch (error) {
-        console.error('Erreur lors de la récupération des rendez-vous:', error);
+        console.error("Erreur lors du chargement des rendez-vous :", error);
+        this.appointments = [];
       }
     },
 
-    // Mettre à jour un rendez-vous spécifique
-    async updateAppointment(id, updatedData) {
+    // Ajouter un rendez-vous
+    async addAppointment(appointment) {
       try {
-        const updatedAppointment = await updateAppointmentById(id, updatedData);  // Appel API pour mettre à jour le rendez-vous
-        const index = this.appointments.findIndex(app => app.id === id);
+        // if (!this.validateAppointment(appointment)) {
+        //   throw new Error("Données du rendez-vous invalides.");
+        // }
+        const response = await axios.post("http://localhost:3000/api/rendezvous", appointment);
+        this.appointments.push(response.data);
+        console.log("Rendez-vous ajouté avec succès");
+      } catch (error) {
+        console.error("Erreur lors de l'ajout du rendez-vous :", error);
+      }
+    },
+
+    // Valider les données du rendez-vous
+    // validateAppointment(appointment) {
+    //   return appointment.dateHeure && appointment.telephone && appointment.medecinId && appointment.utilisateurId;
+    // },
+    
+    // Mettre à jour un rendez-vous
+    async updateAppointment(id, updatedAppointment) {
+      try {
+        await axios.put(`http://localhost:3000/api/rendezvous/${id}`, updatedAppointment);
+        const index = this.appointments.findIndex((appointment) => appointment.id === id);
         if (index !== -1) {
-          this.appointments[index] = updatedAppointment;  // Met à jour le rendez-vous dans la liste
+          this.appointments[index] = { ...this.appointments[index], ...updatedAppointment };
         }
+        console.log("Rendez-vous mis à jour avec succès");
       } catch (error) {
-        console.error('Erreur lors de la mise à jour du rendez-vous:', error);
+        console.error("Erreur lors de la mise à jour du rendez-vous :", error);
       }
     },
 
-    // Supprimer un rendez-vous par son ID
+    // Supprimer un rendez-vous
     async deleteAppointment(id) {
       try {
-        await deleteAppointmentById(id);  // Appel API pour supprimer le rendez-vous
-        this.appointments = this.appointments.filter(app => app.id !== id);  // Met à jour la liste après suppression
+        await axios.delete(`http://localhost:3000/api/rendezvous/${id}`);
+        this.appointments = this.appointments.filter((appointment) => appointment.id !== id); 
+        console.log("Rendez-vous supprimé avec succès");
       } catch (error) {
-        console.error('Erreur lors de la suppression du rendez-vous:', error);
+        console.error("Erreur lors de la suppression du rendez-vous :", error);
       }
     },
 
-    // Annuler un rendez-vous (mettre à jour son statut)
-    async cancelAppointment(id) {
-      try {
-        const updatedAppointment = await cancelAppointmentById(id);  // Appel API pour annuler le rendez-vous
-        const index = this.appointments.findIndex(app => app.id === id);
-        if (index !== -1) {
-          this.appointments[index].status = 'annulé';  // Met à jour le statut du rendez-vous dans la liste
-        }
-      } catch (error) {
-        console.error('Erreur lors de l’annulation du rendez-vous:', error);
-      }
-    },
+    // Récupérer un rendez-vous par son ID
+    getAppointmentById(id) {
+      return this.appointments.find((appointment) => appointment.id === id);
+    }
   },
+  persist: true
 });
