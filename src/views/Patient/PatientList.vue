@@ -1,14 +1,16 @@
 <template>
+   <div class="header">
+        <h1>Liste des Patients</h1>
+      </div>
     <div class="patient-dashboard">
       <div class="header">
-        <h1>Liste des Patients</h1>
         <button @click="navigateToAddPatient" class="btn btn-primary add-patient-button">
           Ajouter Patient
         </button>
       </div>
   
       <div class="table-responsive">
-        <table class="table table-bordered text-center">
+        <table class="table table-bordered text-center table-hover">
           <thead>
             <tr>
               <th>ID</th>
@@ -17,7 +19,6 @@
               <th>Email</th>
               <th>Date de Naissance</th>
               <th>Adresse</th>
-              <!-- <th>ID Utilisateur</th> -->
               <th>Actions</th>
             </tr>
           </thead>
@@ -29,7 +30,6 @@
               <td>{{ patient.email }}</td>
               <td>{{ formatDate(patient.date_naissance) }}</td>
               <td>{{ patient.adresse }}</td>
-              <!-- <td>{{ patient.admin_id }}</td> -->
               <td>
                 <font-awesome-icon @click="viewPatient(patient)" icon="eye" class="text-primary mx-2" />
                 <font-awesome-icon @click="editPatient(patient)" icon="pen" class="text-warning mx-2" />
@@ -70,11 +70,6 @@
                   <label>Adresse</label>
                   <input v-model="selectedPatient.adresse" class="form-control" required />
                 </div>
-                <!-- Champ ID Utilisateur ajouté -->
-                <!-- <div class="form-group">
-                  <label>ID Utilisateur</label>
-                  <input v-model="selectedPatient.admin_id" class="form-control" required />
-                </div> -->
                 <div class="modal-footer">
                   <button type="submit" class="btn btn-primary">Enregistrer</button>
                   <button type="button" class="btn btn-secondary" @click="closeModal">Annuler</button>
@@ -87,7 +82,6 @@
                 <p><strong>Email :</strong> {{ selectedPatient.email }}</p>
                 <p><strong>Date de Naissance :</strong> {{ formatDate(selectedPatient.date_naissance) }}</p>
                 <p><strong>Adresse :</strong> {{ selectedPatient.adresse }}</p>
-                <!-- <p><strong>ID Utilisateur :</strong> {{ selectedPatient.admin_id }}</p> -->
               </div>
             </div>
             <div class="modal-footer" v-if="!editMode">
@@ -160,7 +154,6 @@
       };
   
       const deletePatient = async (id) => {
-        // Vérifiez d'abord si le patient a des rendez-vous associés
         const hasAppointments = await patientStore.checkPatientAppointments(id);
   
         if (hasAppointments) {
@@ -182,7 +175,7 @@
       return {
         patients,
         formatDate,
-        navigateToAddPatient: () => router.push('/admin/patients/add'),
+        navigateToAddPatient: () => router.push('/add-patient'),
         viewPatient,
         editPatient,
         deletePatient,
@@ -200,49 +193,40 @@
   .patient-dashboard {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: end;
     margin-top: 20px;
   }
   
-  .header {
-    width: 75%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+  .table-responsive {
+    width: 100%;
+    margin-top: 20px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
   }
   
   h1 {
-    text-align: center;
-    flex-grow: 1;
-    margin: 0;
+    margin: 60px 0 20px 0;
+    color: #343a40;
+    font-weight: bold;
   }
   
   .add-patient-button {
     margin-left: auto;
-    margin-top: 10px;
-  }
-  
-  .table-responsive {
-    width: 75%;
   }
   
   .table {
-    background-color: #fff;
+    width: 100%;
+    table-layout: fixed;
   }
   
-  th,
-  td {
+  .table th,
+  .table td {
     vertical-align: middle;
+    word-wrap: break-word;
   }
   
-  .mx-2 {
-    margin-left: 0.5rem;
-    margin-right: 0.5rem;
-  }
-  
-  .font-awesome-icon {
-    cursor: pointer;
+  .table-hover tbody tr:hover {
+    background-color: #f1f1f1;
   }
   
   .modal {

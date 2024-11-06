@@ -1,21 +1,25 @@
 <template>
+   <div class="d-flex justify-content-between align-items-start mb-3">
+      <h1 class="title">Liste des Rendez-vous</h1>
+      
+    </div>
   <div class="admin-dashboard">
-    <h1>Liste des rendez-vous</h1>
-
-    <button @click="navigateToAddAppointment" class="btn btn-primary mb-3">
-      Ajouter Rendez-vous
-    </button>
+   <div>
+    <button @click="navigateToAddAppointment" class="btn btn-primary ">
+        Ajouter Rendez-vous
+      </button>
+   </div>
 
     <div class="table-responsive">
-      <div class="search-bar">
+      <div class="search-bar mb-3">
         <label for="search-date">Rechercher par date :</label>
-        <input type="date" id="search-date" v-model="searchDate" @input="filterAppointments" />
+        <input type="date" id="search-date" v-model="searchDate" @input="filterAppointments" class="form-control" />
       </div>
 
       <table class="table table-hover table-bordered text-center">
-        <thead>
+        <thead class="thead-dark">
           <tr>
-            <th>Date et Heure du Rendez-vous</th>
+            <th>Date et Heure</th>
             <th>Patient</th>
             <th>Téléphone</th>
             <th>Médecin</th>
@@ -70,7 +74,7 @@
                 <input v-model="selectedAppointment.medecin.nom" class="form-control" required />
               </div>
               <div class="modal-footer">
-                <button type="submit" class="btn btn-primary">Enregistrer</button>
+                <button type="submit" class="btn btn-success">Enregistrer</button>
                 <button type="button" class="btn btn-secondary" @click="closeModal">Annuler</button>
               </div>
             </form>
@@ -144,7 +148,7 @@ export default {
     };
 
     const navigateToAddAppointment = () => {
-      router.push('/admin/appointments/add');
+      router.push('/add-appointment');
     };
 
     onMounted(async () => {
@@ -173,25 +177,52 @@ export default {
 .admin-dashboard {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: end;
   margin-top: 20px;
 }
 
 .table-responsive {
-  width: 65%;
+  width: 100%; /* Prendre toute la largeur disponible */
   margin-top: 20px;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
   overflow: hidden;
 }
 
-h1 {
-  margin-bottom: 20px;
+.title {
+  margin: 60px 0 20px 0; /* Augmenter la marge supérieure pour descendre le titre */
   color: #343a40;
+  font-weight: bold;
+  /* text-align: center;  */
+  flex-grow: 1; /* Permet au titre d'occuper tout l'espace disponible */
 }
 
 .search-bar {
+  display: flex;
+  align-items: center;
   margin-bottom: 20px;
+}
+
+.search-bar label {
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+.search-bar input {
+  width: auto; /* Ajustement pour s'adapter à la barre de recherche */
+}
+
+.table {
+  width: 100%; /* Assurez-vous que la table occupe toute la largeur du conteneur */
+  table-layout: fixed; /* Fixer le layout de la table pour un meilleur contrôle */
+}
+
+.table th, .table td {
+  word-wrap: break-word; /* Permettre le retour à la ligne dans les cellules */
+}
+
+.table-hover tbody tr:hover {
+  background-color: #f1f1f1; /* Couleur d'arrière-plan au survol */
 }
 
 .modal {

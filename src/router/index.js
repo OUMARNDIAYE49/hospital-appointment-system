@@ -1,85 +1,33 @@
 import { createRouter, createWebHistory } from 'vue-router';
-// import AdminDashboard from '../components/AdminDashboard.vue';
-import AddAppointment from '../views/AddAppointment.vue';
-import AppointmentList from '../views/AppointmentList.vue';
-import DoctorDashboard from '../components/DoctorDashboard.vue';
-import LoginView from '../views/LoginView.vue';
-import HomeView from '../views/HomeView.vue';
-import DoctorsList from '../views/DoctorsList.vue';
-import AddDoctor from '../views/AddDoctor.vue';
-import SpecialiteList from '../views/SpecialiteList.vue';
-import AddSpecialty from '../views/AddSpecialty.vue'; 
-import UserList from '../views/UserList.vue';
-import AddUser from '../views/AddUser.vue';  
-import PatientList from '../views/PatientList.vue';  // Composant pour la liste des patients
-import AddPatient from '../views/AddPatient.vue';    // Composant pour l'ajout de patients
 
-
+// Importation des vues
+import Login from '../components/Login.vue';
+import Sidebar from '../components/Sidebar.vue';
+import Home from '../views/Home.vue';
+import Appointments from '../views/Appointment/AppointmentList.vue';
+import UserList from '../views/User/UserList.vue';
+import AddUser from '../views/User/AddUser.vue';
+import SpecialtyList from '../views/Specialty/SpecialtyList.vue'; // Liste des spécialités
+import AddSpecialty from '../views/Specialty/AddSpecialty.vue'; // Liste des spécialités
+import PatientList from '../views/Patient/PatientList.vue'; // Liste des patients
+import AddPatient from '../views/Patient/AddPatient.vue'; // Liste des patients
+import AddAppointment from '../views/Appointment/AddAppointment.vue'; // Ajouter un rendez-vous
 
 const routes = [
-  {
-    path: '/',
-    name: 'Home',
-    component: HomeView,
-  },
-  {
-    path: '/login',
-    name: 'Login',
-    component: LoginView,
-  },
-  {
-    path: '/admin',
-    name: 'Admin',
-    component: AppointmentList,
-    meta: { requiresAuth: true, role: 'admin' },
-  },
-  {
-    path: '/admin/appointments/add',
-    name: 'AddAppointment',
-    component: AddAppointment,
-    meta: { requiresAuth: true, role: 'admin' },
-  },
-  
-  {
-    path: '/admin/users',
-    name: 'UserList',
-    component: UserList,
-  },
-  {
-    path: '/admin/users/add',
-    name: 'AddUser',
-    component: AddUser,
-  },
-  {
-    path: '/admin/specialties',
-    name: 'Specialties',
-    component: SpecialiteList,
-    meta: { requiresAuth: true, role: 'admin' },
-  },
-  {
-    path: '/admin/specialties/add', // Nouvelle route pour ajouter une spécialité
-    name: 'AddSpecialty',
-    component: AddSpecialty, // Le composant de formulaire d'ajout de spécialité
-    meta: { requiresAuth: true, role: 'admin' },
-  },
-  { 
-    path: '/admin/patients', 
-    name: 'PatientList', 
-    component: PatientList, 
-    meta: { requiresAuth: true, role: 'admin' } 
-  },
-  { 
-    path: '/admin/patients/add', 
-    name: 'AddPatient', 
-    component: AddPatient, 
-    meta: { requiresAuth: true, role: 'admin' } 
-  },
-  {
-    path: '/doctor',
-    name: 'Doctor',
-    component: DoctorDashboard,
-    meta: { requiresAuth: true, role: 'doctor' },
-  },
+  { path: '/', name: 'Login', component: Login },
+  { path: '/Home', name: 'Sidebar', component: Sidebar,
+    children:[
+      { path: '/appointments', name: 'Appointments', component: Appointments },
+      { path: '/users', name: 'UserList', component: UserList },
+      { path: '/add-user', name: 'AddUser', component: AddUser },
+      { path: '/add-patient', name: 'AddPatient', component: AddPatient },
+      { path: '/specialties', name: 'SpecialtyList', component: SpecialtyList },
+      { path: '/add-specialties', name: 'AddSpecialty', component: AddSpecialty },
+      { path: '/patients', name: 'PatientList', component: PatientList }, // Nouvelle route pour la liste des patients
+      { path: '/add-appointment', name: 'AddAppointment', component: AddAppointment }, // Ajouter un rendez-vous
+    ]
+   },
+ 
 ];
 
 const router = createRouter({

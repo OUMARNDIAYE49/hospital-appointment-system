@@ -1,14 +1,17 @@
 <template>
+  <div class="header">
+      <h1>Liste des Spécialités</h1>
+      
+    </div>
   <div class="admin-dashboard">
     <div class="header">
-      <h1>Liste des Spécialités</h1>
       <button @click="navigateToAddSpecialty" class="btn btn-primary add-specialty-button">
         Ajouter Spécialité
       </button>
     </div>
 
     <div class="table-responsive">
-      <table class="table table-bordered text-center">
+      <table class="table table-bordered text-center table-hover">
         <thead>
           <tr>
             <th>Nom de la Spécialité</th>
@@ -99,22 +102,14 @@ export default {
     };
 
     const saveEdit = async () => {
-  const id = selectedSpecialty.value.id;
-  const success = await specialiteStore.updateSpecialite(id, selectedSpecialty.value);
-  
-  if (success) {
-    await specialiteStore.loadDataFromApi();  // Rafraîchir la liste après la mise à jour
-    closeModal();  // Fermer le modal
-  } else {
-    alert("Erreur lors de la mise à jour de la spécialité. Veuillez réessayer.");
-  }
-};
-
+      const id = selectedSpecialty.value.id;
+      await specialiteStore.updateSpecialite(id, selectedSpecialty.value);
+      closeModal();
+    };
 
     const deleteSpecialty = async (id) => {
       if (confirm("Êtes-vous sûr de vouloir supprimer cette spécialité ?")) {
         await specialiteStore.deleteSpecialite(id);
-        await specialiteStore.loadDataFromApi();
       }
     };
 
@@ -128,7 +123,7 @@ export default {
       closeModal,
       saveEdit,
       deleteSpecialty,
-      navigateToAddSpecialty: () => router.push('/admin/specialties/add'),
+      navigateToAddSpecialty: () => router.push('/add-specialties'),
     };
   },
 };
@@ -138,45 +133,40 @@ export default {
 .admin-dashboard {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: end;
   margin-top: 20px;
 }
 
-.header {
-  width: 65%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+.table-responsive {
+  width: 100%;
+  margin-top: 20px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
 }
 
 h1 {
-  text-align: center;
-  flex-grow: 1;
-  margin: 0;
+  margin: 60px 0 20px 0;
+  color: #343a40;
+  font-weight: bold;
 }
 
 .add-specialty-button {
   margin-left: auto;
-  margin-top: 10px;
-}
-
-.table-responsive {
-  width: 65%;
 }
 
 .table {
-  background-color: #fff;
+  width: 100%;
+  table-layout: fixed;
 }
 
-th,
-td {
+.table th,
+.table td {
   vertical-align: middle;
+  word-wrap: break-word;
 }
 
-.mx-2 {
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
+.table-hover tbody tr:hover {
+  background-color: #f1f1f1;
 }
 
 .modal {
@@ -204,7 +194,8 @@ td {
   position: relative;
 }
 
-.modal-header, .modal-footer {
+.modal-header,
+.modal-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;

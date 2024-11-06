@@ -2,7 +2,7 @@
   <div class="admin-dashboard">
     <h1 class="text-center mb-4">Ajouter un Rendez-vous</h1>
 
-    <form @submit.prevent="addAppointment" class="shadow-lg p-4 rounded bg-light">
+    <form @submit.prevent="addAppointment" class="shadow-lg p-4 rounded bg-white">
       <div class="form-group mb-3">
         <label for="date" class="form-label">Date et Heure du Rendez-vous</label>
         <input 
@@ -56,7 +56,7 @@
 
       <div class="d-flex justify-content-between">
         <button type="submit" class="btn btn-primary">Enregistrer</button>
-        <button type="button" class="btn btn-secondary" @click="cancelAdd">Annuler</button>
+        <button type="button" class="btn btn-outline-secondary" @click="cancelAdd">Annuler</button>
       </div>
     </form>
   </div>
@@ -78,7 +78,7 @@ export default {
     const userStore = useUtilisateurStore();
 
     const newAppointment = ref({
-      date: '',  // Notez que `date` est un champ `DateTime`
+      date: '',
       patient_id: '',
       medecin_id: '',
       status: '',
@@ -100,7 +100,7 @@ export default {
 
         if (addedAppointment) {
           resetForm();
-          router.push('/admin');
+          router.push('/appointments');
         }
       } catch (error) {
         console.error("Erreur lors de l'ajout du rendez-vous :", error);
@@ -138,17 +138,20 @@ export default {
   padding: 20px;
 }
 
+h1 {
+  color: #004085;
+  font-weight: bold;
+  margin-top: 20px;
+}
+
 form {
   max-width: 600px;
   width: 100%;
-}
-
-h1 {
-  color: #0056b3;
+  border-radius: 8px;
 }
 
 .shadow-lg {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
 .form-group {
@@ -156,19 +159,30 @@ h1 {
 }
 
 .btn {
-  flex: 1;
-  margin-right: 10px;
+  width: 48%;
 }
 
 .btn-primary {
-  background-color: #007bff;
+  background-color: #0069d9;
+  border: none;
 }
 
-.btn-secondary {
-  background-color: #6c757d;
+.btn-outline-secondary {
+  color: #6c757d;
+  border: 1px solid #6c757d;
 }
 
-.btn:hover {
-  opacity: 0.8;
+.btn-primary:hover, .btn-outline-secondary:hover {
+  opacity: 0.9;
+}
+
+.bg-white {
+  background-color: #ffffff;
+}
+
+.form-control, .form-select {
+  height: 45px;
+  font-size: 16px;
+  border-radius: 4px;
 }
 </style>
