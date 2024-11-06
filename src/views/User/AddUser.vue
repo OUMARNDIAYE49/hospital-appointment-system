@@ -71,16 +71,20 @@ export default {
         email: email.value,
         password: password.value,
         role: role.value,
-        specialite_id: role.value === 'ADMIN' ? 'secretaire' : specialite_id.value,
+        specialite_id: role.value === 'ADMIN' ? null : specialite_id.value,
       };
 
-      await utilisateurStore.addUtilisateur(utilisateur);
-      router.push('/users');
+      try {
+        await utilisateurStore.addUtilisateur(utilisateur);
+        router.push('/users');
+      } catch (error) {
+        console.error("Erreur lors de l'ajout de l'utilisateur :", error);
+      }
     };
 
     const handleRoleChange = () => {
       if (role.value === 'ADMIN') {
-        specialite_id.value = 'secretaire';
+        specialite_id.value = null;
       } else {
         specialite_id.value = '';
       }
@@ -91,8 +95,12 @@ export default {
     };
 
     const fetchSpecialites = async () => {
-      await utilisateurStore.fetchSpecialites();
-      specialites.value = utilisateurStore.specialites;
+      try {
+        await utilisateurStore.fetchSpecialites();
+        specialites.value = utilisateurStore.specialites;
+      } catch (error) {
+        console.error("Erreur lors du chargement des spécialités :", error);
+      }
     };
 
     onMounted(() => {

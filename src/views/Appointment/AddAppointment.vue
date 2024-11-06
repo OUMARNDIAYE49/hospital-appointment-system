@@ -56,7 +56,6 @@
 
       <div class="d-flex justify-content-between">
         <button type="submit" class="btn btn-primary">Enregistrer</button>
-        <button type="button" class="btn btn-outline-secondary" @click="cancelAdd">Annuler</button>
       </div>
     </form>
   </div>
@@ -99,22 +98,19 @@ export default {
         });
 
         if (addedAppointment) {
-          resetForm();
-          router.push('/appointments');
+          // Réinitialiser manuellement les champs sans utiliser resetForm()
+          newAppointment.value.date = '';
+          newAppointment.value.patient_id = '';
+          newAppointment.value.medecin_id = '';
+          newAppointment.value.status = '';
+
+          router.push('/appointments'); // Redirection vers la liste des rendez-vous
+        } else {
+          console.warn("Le rendez-vous n'a pas été ajouté.");
         }
       } catch (error) {
         console.error("Erreur lors de l'ajout du rendez-vous :", error);
         alert("Erreur lors de l'ajout du rendez-vous : " + error.message);
-      }
-    };
-
-    const resetForm = () => {
-      newAppointment.value = { date: '', patient_id: '', medecin_id: '', status: '' };
-    };
-
-    const cancelAdd = () => {
-      if (confirm("Êtes-vous sûr de vouloir annuler l'ajout de ce rendez-vous ?")) {
-        resetForm();
       }
     };
 
@@ -123,7 +119,6 @@ export default {
       patients,
       medecins,
       addAppointment,
-      cancelAdd,
     };
   },
 };

@@ -1,8 +1,7 @@
 <template>
   <div class="header">
-      <h1>Liste des Spécialités</h1>
-      
-    </div>
+    <h1>Liste des Spécialités</h1>
+  </div>
   <div class="admin-dashboard">
     <div class="header">
       <button @click="navigateToAddSpecialty" class="btn btn-primary add-specialty-button">
@@ -104,12 +103,21 @@ export default {
     const saveEdit = async () => {
       const id = selectedSpecialty.value.id;
       await specialiteStore.updateSpecialite(id, selectedSpecialty.value);
+
+      // Mettre à jour directement dans la liste pour voir les changements en temps réel
+      const index = specialties.value.findIndex(specialty => specialty.id === id);
+      if (index !== -1) {
+        specialties.value[index] = { ...selectedSpecialty.value };
+      }
+
       closeModal();
     };
 
     const deleteSpecialty = async (id) => {
       if (confirm("Êtes-vous sûr de vouloir supprimer cette spécialité ?")) {
         await specialiteStore.deleteSpecialite(id);
+        // Rafraîchit la liste après suppression
+        await specialiteStore.loadDataFromApi();
       }
     };
 

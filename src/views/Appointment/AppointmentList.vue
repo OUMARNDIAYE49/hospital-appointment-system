@@ -1,14 +1,13 @@
 <template>
-   <div class="d-flex justify-content-between align-items-start mb-3">
-      <h1 class="title">Liste des Rendez-vous</h1>
-      
-    </div>
+  <div class="d-flex justify-content-between align-items-start mb-3">
+    <h1 class="title">Liste des Rendez-vous</h1>
+  </div>
   <div class="admin-dashboard">
-   <div>
-    <button @click="navigateToAddAppointment" class="btn btn-primary ">
+    <div>
+      <button @click="navigateToAddAppointment" class="btn btn-primary">
         Ajouter Rendez-vous
       </button>
-   </div>
+    </div>
 
     <div class="table-responsive">
       <div class="search-bar mb-3">
@@ -35,9 +34,9 @@
             <td v-if="appointment.medecin">{{ appointment.medecin.nom }}</td>
             <td>{{ appointment.status }}</td>
             <td>
-              <font-awesome-icon @click="viewAppointment(appointment)" icon="eye" class="action-icon text-info" />
-              <font-awesome-icon @click="editAppointment(appointment)" icon="pen" class="action-icon text-warning" />
-              <font-awesome-icon @click="deleteAppointment(appointment.id)" icon="trash" class="action-icon text-danger" />
+              <font-awesome-icon @click="viewAppointment(appointment)" icon="eye" class="action-icon text-info mx-2" />
+              <font-awesome-icon @click="editAppointment(appointment)" icon="pen" class="action-icon text-warning mx-2" />
+              <font-awesome-icon @click="deleteAppointment(appointment.id)" icon="trash" class="action-icon text-danger mx-2" />
             </td>
           </tr>
         </tbody>
@@ -59,19 +58,27 @@
               </div>
               <div class="form-group">
                 <label>Statut</label>
-                <input v-model="selectedAppointment.status" class="form-control" required />
+                <select v-model="selectedAppointment.status" class="form-control" required>
+                  <option value="Confirmé">Confirmé</option>
+                  <option value="Annulé">Annulé</option>
+                  <option value="En attente">En attente</option>
+                </select>
               </div>
               <div class="form-group">
                 <label>Nom du Patient</label>
-                <input v-model="selectedAppointment.patient.nom" class="form-control" required />
-              </div>
-              <div class="form-group">
-                <label>Téléphone du Patient</label>
-                <input v-model="selectedAppointment.patient.telephone" class="form-control" required />
+                <select v-model="selectedAppointment.patient.telephone" class="form-control" required>
+                  <option v-for="patient in patientStore.patients" :key="patient.telephone" :value="patient.telephone">
+                    {{ patient.nom }} ({{ patient.telephone }})
+                  </option>
+                </select>
               </div>
               <div class="form-group">
                 <label>Médecin</label>
-                <input v-model="selectedAppointment.medecin.nom" class="form-control" required />
+                <select v-model="selectedAppointment.medecin.nom" class="form-control" required>
+                  <option v-for="medecin in medecins" :key="medecin.nom" :value="medecin.nom">
+                    {{ medecin.nom }}
+                  </option>
+                </select>
               </div>
               <div class="modal-footer">
                 <button type="submit" class="btn btn-success">Enregistrer</button>
@@ -100,6 +107,7 @@ import { ref, onMounted } from 'vue';
 import { useAppointmentStore } from '@/store/appointmentStore';
 import { usePatientStore } from '@/store/patientStore';
 import { useRouter } from 'vue-router';
+import { useUtilisateurStore } from '../../store/userStore';
 
 export default {
   name: 'AppointmentList',
@@ -138,13 +146,16 @@ export default {
       selectedAppointment.value = {};
     };
 
+    
     const saveEdit = async () => {
       await appointmentStore.updateAppointment(selectedAppointment.value.id, selectedAppointment.value);
       closeModal();
     };
 
     const deleteAppointment = async (id) => {
-      await appointmentStore.deleteAppointment(id);
+      if (confirm("Voulez-vous vraiment supprimer ce rendez-vous ?")) {
+        await appointmentStore.deleteAppointment(id);
+      }
     };
 
     const navigateToAddAppointment = () => {
@@ -154,10 +165,14 @@ export default {
     onMounted(async () => {
       await appointmentStore.loadDataFromApi();
       await patientStore.loadDataFromApi();
+useUtilisateurStore().loadDataFromApi()
+
     });
 
     return {
       appointmentStore,
+      patientStore,
+      // useUtilisateurStore,
       searchDate,
       showModal,
       editMode,
@@ -182,7 +197,7 @@ export default {
 }
 
 .table-responsive {
-  width: 100%; /* Prendre toute la largeur disponible */
+  width: 100%;
   margin-top: 20px;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
@@ -190,11 +205,9 @@ export default {
 }
 
 .title {
-  margin: 60px 0 20px 0; /* Augmenter la marge supérieure pour descendre le titre */
+  margin: 60px 0 20px 0;
   color: #343a40;
   font-weight: bold;
-  /* text-align: center;  */
-  flex-grow: 1; /* Permet au titre d'occuper tout l'espace disponible */
 }
 
 .search-bar {
@@ -209,20 +222,20 @@ export default {
 }
 
 .search-bar input {
-  width: auto; /* Ajustement pour s'adapter à la barre de recherche */
+  width: auto;
 }
 
 .table {
-  width: 100%; /* Assurez-vous que la table occupe toute la largeur du conteneur */
-  table-layout: fixed; /* Fixer le layout de la table pour un meilleur contrôle */
+  width: 100%;
+  table-layout: fixed;
 }
 
 .table th, .table td {
-  word-wrap: break-word; /* Permettre le retour à la ligne dans les cellules */
+  word-wrap: break-word;
 }
 
 .table-hover tbody tr:hover {
-  background-color: #f1f1f1; /* Couleur d'arrière-plan au survol */
+  background-color: #f1f1f1;
 }
 
 .modal {
@@ -239,27 +252,23 @@ export default {
 }
 
 .modal-dialog {
-  max-width: 500px;
+  max-width: 600px;
   width: 100%;
 }
 
 .modal-content {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  position: relative;
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-.modal-header, .modal-footer {
+.modal-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
 }
 
-.close {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
 }
 </style>

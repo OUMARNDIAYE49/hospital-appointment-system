@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import axios from "axios";
+import { useAuthStore } from "./authStore";
 
 export const useAppointmentStore = defineStore("appointment", {
   state: () => ({
@@ -11,8 +12,15 @@ export const useAppointmentStore = defineStore("appointment", {
   actions: {
     // Charger tous les rendez-vous depuis l'API
     async loadDataFromApi() {
+      const auth = useAuthStore();
       try {
-        const response = await axios.get("http://localhost:3000/api/rendezvous");
+        const response = await axios.get("http://localhost:3000/api/rendezvous",
+          {
+            headers: {
+              Authorization: `Bearer ${auth.token}`,
+            },
+          }
+        );
         this.appointments = response.data;
       } catch (error) {
         console.error("Erreur lors du chargement des rendez-vous :", error);
@@ -22,11 +30,18 @@ export const useAppointmentStore = defineStore("appointment", {
 
     // Ajouter un rendez-vous
     async addAppointment(appointment) {
+      const auth = useAuthStore();
       try {
         // if (!this.validateAppointment(appointment)) {
         //   throw new Error("Données du rendez-vous invalides.");
         // }
-        const response = await axios.post("http://localhost:3000/api/rendezvous", appointment);
+        const response = await axios.post("http://localhost:3000/api/rendezvous", appointment,
+          {
+            headers: {
+              Authorization: `Bearer ${auth.token}`,
+            },
+          }
+        );
         this.appointments.push(response.data);
         console.log("Rendez-vous ajouté avec succès");
       } catch (error) {
@@ -41,8 +56,15 @@ export const useAppointmentStore = defineStore("appointment", {
     
     // Mettre à jour un rendez-vous
     async updateAppointment(id, updatedAppointment) {
+      const auth = useAuthStore();
       try {
-        await axios.put(`http://localhost:3000/api/rendezvous/${id}`, updatedAppointment);
+        await axios.put(`http://localhost:3000/api/rendezvous/${id}`, updatedAppointment, 
+          {
+            headers: {
+              Authorization: `Bearer ${auth.token}`,
+            },
+          }
+        );
         const index = this.appointments.findIndex((appointment) => appointment.id === id);
         if (index !== -1) {
           this.appointments[index] = { ...this.appointments[index], ...updatedAppointment };
@@ -55,8 +77,15 @@ export const useAppointmentStore = defineStore("appointment", {
 
     // Supprimer un rendez-vous
     async deleteAppointment(id) {
+      const auth = useAuthStore();
       try {
-        await axios.delete(`http://localhost:3000/api/rendezvous/${id}`);
+        await axios.delete(`http://localhost:3000/api/rendezvous/${id}`, 
+          {
+            headers: {
+              Authorization: `Bearer ${auth.token}`,
+            },
+          }
+        );
         this.appointments = this.appointments.filter((appointment) => appointment.id !== id); 
         console.log("Rendez-vous supprimé avec succès");
       } catch (error) {
