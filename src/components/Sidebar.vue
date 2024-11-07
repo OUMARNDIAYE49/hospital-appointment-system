@@ -39,11 +39,11 @@
               <font-awesome-icon icon="stethoscope" class="sidebar-icon" /> Spécialités
             </router-link>
           </li>
-          <li>
+          <!-- <li>
             <router-link to="/settings" exact-active-class="active-link" @click="setHorizontalMenu">
               <font-awesome-icon icon="cog" class="sidebar-icon" /> Paramètres
             </router-link>
-          </li>
+          </li> -->
         </ul>
       </div>
       <router-view />
@@ -107,7 +107,7 @@
   .sidebar {
     width: 250px;
     height: calc(100vh - 70px);
-    background-color: #2c3e50; /* Couleur de fond de la sidebar */
+    background-color: #3b5998; /* Couleur de fond de la sidebar */
     color: #ecf0f1; /* Couleur du texte de la sidebar */
     padding: 20px;
     position: fixed;
@@ -147,13 +147,13 @@
   }
   
   .sidebar a:hover {
-    background-color: #34495e; /* Couleur de fond au survol des liens */
+    background-color: #3b5998; /* Couleur de fond au survol des liens */
     color: #f1c40f; /* Couleur du texte au survol des liens */
   }
   
   /* Active link style */
   .active-link {
-    background-color: #34495e; /* Couleur de fond du lien actif */
+    background-color: #3b5998; /* Couleur de fond du lien actif */
     color: #f1c40f; /* Couleur du texte du lien actif */
     font-weight: bold; /* Rendre le lien actif en gras */
   }

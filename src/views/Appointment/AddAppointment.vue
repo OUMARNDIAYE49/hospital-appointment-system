@@ -4,11 +4,22 @@
 
     <form @submit.prevent="addAppointment" class="shadow-lg p-4 rounded bg-white">
       <div class="form-group mb-3">
-        <label for="date" class="form-label">Date et Heure du Rendez-vous</label>
+        <label for="date_debut" class="form-label">Date Début du Rendez-vous</label>
         <input 
           type="datetime-local" 
-          id="date" 
-          v-model="newAppointment.date" 
+          id="date_debut" 
+          v-model="newAppointment.date_debut" 
+          class="form-control" 
+          required 
+        />
+      </div>
+
+      <div class="form-group mb-3">
+        <label for="date_fin" class="form-label">Date Fin du Rendez-vous</label>
+        <input 
+          type="datetime-local" 
+          id="date_fin" 
+          v-model="newAppointment.date_fin" 
           class="form-control" 
           required 
         />
@@ -48,9 +59,9 @@
         <label for="status" class="form-label">Statut</label>
         <select id="status" v-model="newAppointment.status" class="form-select" required>
           <option value="" disabled selected>Choisissez un statut</option>
-          <option value="Confirme">confirmé</option>
-          <option value="Annule">annulé</option>
-          <option value="Reporte">en attente</option>
+          <option value="confirmé">confirmé</option>
+          <option value="annulé">annulé</option>
+          <option value="en attente">en attente</option>
         </select>
       </div>
 
@@ -77,7 +88,8 @@ export default {
     const userStore = useUtilisateurStore();
 
     const newAppointment = ref({
-      date: '',
+      date_debut: '',
+      date_fin: '',
       patient_id: '',
       medecin_id: '',
       status: '',
@@ -98,8 +110,9 @@ export default {
         });
 
         if (addedAppointment) {
-          // Réinitialiser manuellement les champs sans utiliser resetForm()
-          newAppointment.value.date = '';
+          // Réinitialiser les champs manuellement
+          newAppointment.value.date_debut = '';
+          newAppointment.value.date_fin = '';
           newAppointment.value.patient_id = '';
           newAppointment.value.medecin_id = '';
           newAppointment.value.status = '';
@@ -162,12 +175,7 @@ form {
   border: none;
 }
 
-.btn-outline-secondary {
-  color: #6c757d;
-  border: 1px solid #6c757d;
-}
-
-.btn-primary:hover, .btn-outline-secondary:hover {
+.btn-primary:hover {
   opacity: 0.9;
 }
 

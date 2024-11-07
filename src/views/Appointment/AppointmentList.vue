@@ -18,7 +18,8 @@
       <table class="table table-hover table-bordered text-center">
         <thead class="thead-dark">
           <tr>
-            <th>Date et Heure</th>
+            <th>Date début</th>
+            <th>Date fin</th>
             <th>Patient</th>
             <th>Téléphone</th>
             <th>Médecin</th>
@@ -28,7 +29,8 @@
         </thead>
         <tbody>
           <tr v-for="appointment in appointmentStore.appointments" :key="appointment.id">
-            <td>{{ appointment.date }}</td>
+            <td>{{ appointment.date_debut }}</td>
+            <td>{{ appointment.date_fin }}</td>
             <td v-if="appointment.patient">{{ appointment.patient.nom }}</td>
             <td v-if="appointment.patient">{{ appointment.patient.telephone }}</td>
             <td v-if="appointment.medecin">{{ appointment.medecin.nom }}</td>
@@ -53,15 +55,19 @@
           <div class="modal-body">
             <form v-if="editMode" @submit.prevent="saveEdit">
               <div class="form-group">
-                <label>Date et Heure</label>
-                <input type="datetime-local" v-model="selectedAppointment.date" class="form-control" required />
+                <label>Date début</label>
+                <input type="datetime-local" v-model="selectedAppointment.dateDebut" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label>Date fin</label>
+                <input type="datetime-local" v-model="selectedAppointment.dateFin" class="form-control" required />
               </div>
               <div class="form-group">
                 <label>Statut</label>
                 <select v-model="selectedAppointment.status" class="form-control" required>
-                  <option value="Confirmé">Confirmé</option>
-                  <option value="Annulé">Annulé</option>
-                  <option value="En attente">En attente</option>
+                  <option value="confirmé">Confirmé</option>
+                  <option value="annulé">Annulé</option>
+                  <option value="en attente">En attente</option>
                 </select>
               </div>
               <div class="form-group">
@@ -74,8 +80,9 @@
               </div>
               <div class="form-group">
                 <label>Médecin</label>
-                <select v-model="selectedAppointment.medecin.nom" class="form-control" required>
-                  <option v-for="medecin in medecins" :key="medecin.nom" :value="medecin.nom">
+                <select v-model="selectedAppointment.medecin.id" class="form-control" required>
+                  <option value="" disabled>Choisissez un médecin</option>
+                  <option v-for="medecin in medecins" :key="medecin.id" :value="medecin.id">
                     {{ medecin.nom }}
                   </option>
                 </select>
@@ -86,7 +93,8 @@
               </div>
             </form>
             <div v-else>
-              <p><strong>Date et Heure :</strong> {{ selectedAppointment.date }}</p>
+              <p><strong>Date début :</strong> {{ selectedAppointment.date_debut }}</p>
+              <p><strong>Date fin :</strong> {{ selectedAppointment.date_fin }}</p>
               <p><strong>Statut :</strong> {{ selectedAppointment.status }}</p>
               <p><strong>Nom du Patient :</strong> {{ selectedAppointment.patient.nom }}</p>
               <p><strong>Téléphone :</strong> {{ selectedAppointment.patient.telephone }}</p>
@@ -103,11 +111,11 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useAppointmentStore } from '@/store/appointmentStore';
 import { usePatientStore } from '@/store/patientStore';
 import { useRouter } from 'vue-router';
-import { useUtilisateurStore } from '../../store/userStore';
+import { useUtilisateurStore } from '@/store/userStore';
 
 export default {
   name: 'AppointmentList',
@@ -115,6 +123,9 @@ export default {
     const appointmentStore = useAppointmentStore();
     const patientStore = usePatientStore();
     const router = useRouter();
+    const userStore = useUtilisateurStore();
+
+    const medecins = computed(() => userStore.utilisateurs.filter(user => user.role === 'MEDECIN'));
 
     const showModal = ref(false);
     const editMode = ref(false);
@@ -146,9 +157,9 @@ export default {
       selectedAppointment.value = {};
     };
 
-    
     const saveEdit = async () => {
       await appointmentStore.updateAppointment(selectedAppointment.value.id, selectedAppointment.value);
+      await appointmentStore.loadDataFromApi();
       closeModal();
     };
 
@@ -165,18 +176,17 @@ export default {
     onMounted(async () => {
       await appointmentStore.loadDataFromApi();
       await patientStore.loadDataFromApi();
-useUtilisateurStore().loadDataFromApi()
-
+      await userStore.loadDataFromApi();
     });
 
     return {
       appointmentStore,
       patientStore,
-      // useUtilisateurStore,
       searchDate,
       showModal,
       editMode,
       selectedAppointment,
+      medecins,
       viewAppointment,
       editAppointment,
       closeModal,
@@ -252,23 +262,14 @@ useUtilisateurStore().loadDataFromApi()
 }
 
 .modal-dialog {
-  max-width: 600px;
-  width: 100%;
+  max-width: 500px;
 }
 
-.modal-content {
-  background-color: white;
-  border-radius: 5px;
-  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+.modal-footer .btn {
+  margin-right: 10px;
 }
 
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-}
-
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
+.action-icon {
+  cursor: pointer;
 }
 </style>
