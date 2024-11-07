@@ -56,11 +56,11 @@
             <form v-if="editMode" @submit.prevent="saveEdit">
               <div class="form-group">
                 <label>Date début</label>
-                <input type="datetime-local" v-model="selectedAppointment.dateDebut" class="form-control" required />
+                <input type="datetime-local" v-model="selectedAppointment.date_debut" class="form-control" required />
               </div>
               <div class="form-group">
                 <label>Date fin</label>
-                <input type="datetime-local" v-model="selectedAppointment.dateFin" class="form-control" required />
+                <input type="datetime-local" v-model="selectedAppointment.date_fin" class="form-control" required />
               </div>
               <div class="form-group">
                 <label>Statut</label>
@@ -141,27 +141,45 @@ export default {
       showModal.value = true;
       editMode.value = false;
     };
+const editAppointment = (appointment) => {
+  selectedAppointment.value = {
+    id: appointment.id,
+    date_debut: appointment.date_debut,
+    date_fin: appointment.date_fin,
+    status: appointment.status,
+    // Initialise patient et médecin avec des valeurs par défaut
+    patient: appointment.patient || { nom: '', telephone: '' },
+    medecin: appointment.medecin || { nom: '', id: null }
+  };
+  showModal.value = true;
+  editMode.value = true;
+};
 
-    const editAppointment = (appointment) => {
-      selectedAppointment.value = {
-        ...appointment,
-        patient: appointment.patient || { nom: 'Inconnu', telephone: 'Non spécifié' },
-        medecin: appointment.medecin || { nom: 'Non spécifié' }
-      };
-      showModal.value = true;
-      editMode.value = true;
-    };
-
-    const closeModal = () => {
+const closeModal = () => {
       showModal.value = false;
       selectedAppointment.value = {};
     };
 
-    const saveEdit = async () => {
-      await appointmentStore.updateAppointment(selectedAppointment.value.id, selectedAppointment.value);
-      await appointmentStore.loadDataFromApi();
-      closeModal();
+const saveEdit = async () => {
+  if (selectedAppointment.value.id) {
+    // Préparez l'objet pour la mise à jour
+    const updatedAppointment = {
+      id: selectedAppointment.value.id,
+      date_debut: selectedAppointment.value.date_debut,
+      date_fin: selectedAppointment.value.date_fin,
+      status: selectedAppointment.value.status,
+      patient: selectedAppointment.value.patient.telephone,
+      medecin: selectedAppointment.value.medecin.id
     };
+    
+    await appointmentStore.updateAppointment(selectedAppointment.value.id, updatedAppointment);
+    await appointmentStore.loadDataFromApi(); // recharge les rendez-vous après mise à jour
+    closeModal();
+  }
+};
+
+
+
 
     const deleteAppointment = async (id) => {
       if (confirm("Voulez-vous vraiment supprimer ce rendez-vous ?")) {

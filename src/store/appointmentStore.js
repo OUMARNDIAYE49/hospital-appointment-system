@@ -32,9 +32,7 @@ export const useAppointmentStore = defineStore("appointment", {
     async addAppointment(appointment) {
       const auth = useAuthStore();
       try {
-        // if (!this.validateAppointment(appointment)) {
-        //   throw new Error("Données du rendez-vous invalides.");
-        // }
+        
         const response = await axios.post("http://localhost:3000/api/rendezvous", appointment,
           {
             headers: {
@@ -49,10 +47,7 @@ export const useAppointmentStore = defineStore("appointment", {
       }
     },
 
-    // Valider les données du rendez-vous
-    // validateAppointment(appointment) {
-    //   return appointment.dateHeure && appointment.telephone && appointment.medecinId && appointment.utilisateurId;
-    // },
+    
     
     // Mettre à jour un rendez-vous
     async updateAppointment(id, updatedAppointment) {
