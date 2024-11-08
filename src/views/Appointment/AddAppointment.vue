@@ -1,8 +1,13 @@
 <template>
   <div class="admin-dashboard">
-    <h1 class="text-center mb-4">Ajouter un Rendez-vous</h1>
+    <div class="header">
+      <h1>Ajouter un Rendez-vous</h1>
+      <button @click="goToList" class="btn btn-outline-secondary btn-sm">
+        Retour à la liste
+      </button>
+    </div>
 
-    <form @submit.prevent="addAppointment" class="shadow-lg p-4 rounded bg-white">
+    <form @submit.prevent="addAppointment" class="user-form shadow-lg p-4 rounded bg-white">
       <div class="form-group mb-3">
         <label for="date_debut" class="form-label">Date Début du Rendez-vous</label>
         <input 
@@ -66,7 +71,7 @@
       </div>
 
       <div class="d-flex justify-content-between">
-        <button type="submit" class="btn btn-primary">Enregistrer</button>
+        <button type="submit" class="btn btn-primary w-100">Ajouter Rendez-vous</button>
       </div>
     </form>
   </div>
@@ -127,11 +132,16 @@ export default {
       }
     };
 
+    const goToList = () => {
+      router.push('/appointments');
+    };
+
     return {
       newAppointment,
       patients,
       medecins,
       addAppointment,
+      goToList
     };
   },
 };
@@ -142,18 +152,19 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 20px;
-  padding: 20px;
+  margin-top: 75px;
 }
 
 h1 {
+  text-align: left;
   color: #004085;
-  font-weight: bold;
-  margin-top: 20px;
+  font-weight: 600;
+  font-size: 1.6rem;
+  margin: 0;
 }
 
 form {
-  max-width: 600px;
+  max-width: 640px;
   width: 100%;
   border-radius: 8px;
 }
@@ -167,7 +178,7 @@ form {
 }
 
 .btn {
-  width: 48%;
+  width: 20%;
 }
 
 .btn-primary {
@@ -181,6 +192,14 @@ form {
 
 .bg-white {
   background-color: #ffffff;
+}
+
+.header {
+  width: 50%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
 }
 
 .form-control, .form-select {

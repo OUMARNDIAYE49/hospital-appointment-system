@@ -1,20 +1,14 @@
 <template>
+  <div class="d-flex justify-content-between align-items-start mb-3">
+    <h1 class="title">Liste des Utilisateurs</h1>
+  </div>
 
-<div class="d-flex justify-content-between align-items-start mb-3">
-      <h1 class="title">Liste des Utilisateurs</h1>
-      
-    </div>
-    <div class="search-bar">
-      
-      <input type="text" id="search" placeholder="Rechercher un utilisateur..." class="form-control" />
-    </div>
   <div class="admin-dashboard">
     <div class="header">
       <button @click="navigateToAddUser" class="btn btn-primary add-user-button">
         Ajouter Utilisateur
       </button>
     </div>
-
 
     <div class="table-responsive">
       <table class="table table-bordered text-center">
@@ -24,7 +18,7 @@
             <th>Nom</th>
             <th>Email</th>
             <th>Rôle</th>
-            <th>Spécialité</th> <!-- Changement ici -->
+            <th>Spécialité</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -34,7 +28,7 @@
             <td>{{ user.nom }}</td>
             <td>{{ user.email }}</td>
             <td>{{ user.role }}</td>
-            <td>{{ getSpecialiteName(user.specialite_id) }}</td> <!-- Affichage du nom de la spécialité -->
+            <td>{{ getSpecialiteName(user.specialite_id) }}</td>
             <td>
               <font-awesome-icon @click="viewUser(user)" icon="eye" class="text-primary mx-2" />
               <font-awesome-icon @click="editUser(user)" icon="pen" class="text-warning mx-2" />
@@ -58,7 +52,7 @@
             <p><strong>Nom :</strong> {{ selectedUser.nom }}</p>
             <p><strong>Email :</strong> {{ selectedUser.email }}</p>
             <p><strong>Rôle :</strong> {{ selectedUser.role }}</p>
-            <p><strong>Spécialité :</strong> {{ getSpecialiteName(selectedUser.specialite_id) }}</p> <!-- Affichage du nom de la spécialité -->
+            <p><strong>Spécialité :</strong> {{ getSpecialiteName(selectedUser.specialite_id) }}</p>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" @click="closeDetailsModal">Fermer</button>
@@ -68,40 +62,50 @@
     </div>
 
     <!-- Modal pour modifier l'utilisateur -->
-    <div v-if="showEditModal" class="modal" tabindex="-1" role="dialog" @click.self="closeEditModal">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Modifier l'Utilisateur</h5>
-            <button type="button" class="close" @click="closeEditModal">&times;</button>
+    <!-- Modal pour modifier l'utilisateur -->
+<div v-if="showEditModal" class="modal" tabindex="-1" role="dialog" @click.self="closeEditModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Modifier l'Utilisateur</h5>
+        <button type="button" class="close" @click="closeEditModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form @submit.prevent="saveEdit">
+          <div class="form-group">
+            <label>Nom</label>
+            <input v-model="selectedUser.nom" class="form-control" required />
           </div>
-          <div class="modal-body">
-            <form @submit.prevent="saveEdit">
-              <div class="form-group">
-                <label>Nom</label>
-                <input v-model="selectedUser.nom" class="form-control" required />
-              </div>
-              <div class="form-group">
-                <label>Email</label>
-                <input v-model="selectedUser.email" class="form-control" required />
-              </div>
-              <div class="form-group">
-                <label>Rôle</label>
-                <input v-model="selectedUser.role" class="form-control" required />
-              </div>
-              <div class="form-group">
-                <label>ID Spécialité</label>
-                <input v-model="selectedUser.specialite_id" class="form-control" required />
-              </div>
-              <div class="modal-footer">
-                <button type="submit" class="btn btn-primary">Enregistrer</button>
-                <button type="button" class="btn btn-secondary" @click="closeEditModal">Annuler</button>
-              </div>
-            </form>
+          <div class="form-group">
+            <label>Email</label>
+            <input v-model="selectedUser.email" class="form-control" required />
           </div>
-        </div>
+          <div class="form-group">
+            <label>Rôle</label>
+            <select v-model="selectedUser.role" class="form-control" required>
+              <option value="ADMIN">ADMIN</option>
+              <option value="MEDECIN">MEDECIN</option>
+            </select>
+          </div>
+          <!-- Condition pour afficher le champ spécialité seulement si ce n'est pas un ADMIN -->
+          <div v-if="selectedUser.role !== 'ADMIN'" class="form-group">
+            <label>Spécialité</label>
+            <select v-model="selectedUser.specialite_id" class="form-control" required>
+              <option v-for="specialite in specialites" :key="specialite.id" :value="specialite.id">
+                {{ specialite.nom }}
+              </option>
+            </select>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+            <button type="button" class="btn btn-secondary" @click="closeEditModal">Annuler</button>
+          </div>
+        </form>
       </div>
     </div>
+  </div>
+</div>
+
   </div>
 </template>
 
@@ -118,6 +122,7 @@ export default {
     const showDetailsModal = ref(false);
     const showEditModal = ref(false);
     const selectedUser = ref({});
+    const specialites = computed(() => userStore.specialites);
 
     onMounted(() => {
       userStore.loadDataFromApi();
@@ -181,10 +186,13 @@ export default {
       showEditModal,
       selectedUser,
       getSpecialiteName,
+      specialites,
     };
   },
 };
 </script>
+
+
 
 <style scoped>
 .admin-dashboard {

@@ -113,6 +113,11 @@ h1 {
   margin: 0;
 }
 
+.btn {
+  width: 20%;
+}
+
+
 .patient-form {
   width: 50%;
   padding: 20px;

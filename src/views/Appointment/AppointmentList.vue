@@ -10,10 +10,10 @@
     </div>
 
     <div class="table-responsive">
-      <div class="search-bar mb-3">
+      <!-- <div class="search-bar mb-3">
         <label for="search-date">Rechercher par date :</label>
         <input type="date" id="search-date" v-model="searchDate" @input="filterAppointments" class="form-control" />
-      </div>
+      </div> -->
 
       <table class="table table-hover table-bordered text-center">
         <thead class="thead-dark">
@@ -71,22 +71,23 @@
                 </select>
               </div>
               <div class="form-group">
-                <label>Nom du Patient</label>
-                <select v-model="selectedAppointment.patient.telephone" class="form-control" required>
-                  <option v-for="patient in patientStore.patients" :key="patient.telephone" :value="patient.telephone">
-                    {{ patient.nom }} ({{ patient.telephone }})
-                  </option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Médecin</label>
-                <select v-model="selectedAppointment.medecin.id" class="form-control" required>
-                  <option value="" disabled>Choisissez un médecin</option>
-                  <option v-for="medecin in medecins" :key="medecin.id" :value="medecin.id">
-                    {{ medecin.nom }}
-                  </option>
-                </select>
-              </div>
+              <label>Nom du Patient</label>
+              <select v-model="selectedAppointment.patient.id" class="form-control" required>
+                <option v-for="patient in patientStore.patients" :key="patient.id" :value="patient.id">
+                  {{ patient.nom }} ({{ patient.telephone }})
+                </option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Médecin</label>
+              <select v-model="selectedAppointment.medecin.id" class="form-control" required>
+                <option value="" disabled>Choisissez un médecin</option>
+                <option v-for="medecin in medecins" :key="medecin.id" :value="medecin.id">
+                  {{ medecin.nom }}
+                </option>
+              </select>
+            </div>
+
               <div class="modal-footer">
                 <button type="submit" class="btn btn-success">Enregistrer</button>
                 <button type="button" class="btn btn-secondary" @click="closeModal">Annuler</button>
@@ -141,51 +142,56 @@ export default {
       showModal.value = true;
       editMode.value = false;
     };
-const editAppointment = (appointment) => {
-  selectedAppointment.value = {
-    id: appointment.id,
-    date_debut: appointment.date_debut,
-    date_fin: appointment.date_fin,
-    status: appointment.status,
-    // Initialise patient et médecin avec des valeurs par défaut
-    patient: appointment.patient || { nom: '', telephone: '' },
-    medecin: appointment.medecin || { nom: '', id: null }
-  };
-  showModal.value = true;
-  editMode.value = true;
-};
 
-const closeModal = () => {
+    const editAppointment = (appointment) => {
+      selectedAppointment.value = {
+        id: appointment.id,
+        date_debut: appointment.date_debut,
+        date_fin: appointment.date_fin,
+        status: appointment.status,
+        patient: appointment.patient || { nom: '', telephone: '' },
+        medecin: appointment.medecin || { nom: '', id: null }
+      };
+      showModal.value = true;
+      editMode.value = true;
+    };
+
+    const closeModal = () => {
       showModal.value = false;
       selectedAppointment.value = {};
     };
 
-const saveEdit = async () => {
+    const saveEdit = async () => {
   if (selectedAppointment.value.id) {
-    // Préparez l'objet pour la mise à jour
     const updatedAppointment = {
       id: selectedAppointment.value.id,
       date_debut: selectedAppointment.value.date_debut,
       date_fin: selectedAppointment.value.date_fin,
       status: selectedAppointment.value.status,
-      patient: selectedAppointment.value.patient.telephone,
-      medecin: selectedAppointment.value.medecin.id
+      patient_id: selectedAppointment.value.patient.id, // Utilise l'ID du patient
+      medecin_id: selectedAppointment.value.medecin.id // Utilise l'ID du médecin
     };
-    
+
     await appointmentStore.updateAppointment(selectedAppointment.value.id, updatedAppointment);
-    await appointmentStore.loadDataFromApi(); // recharge les rendez-vous après mise à jour
+    await appointmentStore.loadDataFromApi();
     closeModal();
   }
 };
 
 
+const deleteAppointment = async (id) => {
+  if (confirm("Voulez-vous vraiment supprimer ce rendez-vous ?")) {
+    console.log("Suppression de l'ID :", id);
+    try {
+      await appointmentStore.deleteAppointment(id);
+      await appointmentStore.loadDataFromApi(); // Recharge les données après suppression
+      console.log("Rendez-vous supprimé avec succès");
+    } catch (error) {
+      console.error("Erreur lors de la suppression :", error);
+    }
+  }
+};
 
-
-    const deleteAppointment = async (id) => {
-      if (confirm("Voulez-vous vraiment supprimer ce rendez-vous ?")) {
-        await appointmentStore.deleteAppointment(id);
-      }
-    };
 
     const navigateToAddAppointment = () => {
       router.push('/add-appointment');
@@ -215,6 +221,8 @@ const saveEdit = async () => {
   }
 };
 </script>
+
+
 
 <style scoped>
 .admin-dashboard {

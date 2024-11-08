@@ -131,7 +131,7 @@ export default {
 }
 
 .header {
-  width: 65%;
+  width: 55%;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -141,11 +141,13 @@ export default {
 h1 {
   text-align: start;
   color: #004085;
-  font-weight: bold;
+  font-weight: 600;
+  font-size: 1.6rem;
+  margin: 0;
 }
 
 .user-form {
-  width: 65%;
+  width: 55%;
   padding: 20px;
   background-color: #ffffff;
   border-radius: 8px;
