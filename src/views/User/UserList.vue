@@ -113,6 +113,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useUtilisateurStore } from '@/store/userStore';
 import { useRouter } from 'vue-router';
+import Swal from 'sweetalert2';
 
 export default {
   name: 'UserList',
@@ -126,6 +127,7 @@ export default {
 
     onMounted(() => {
       userStore.loadDataFromApi();
+      
     });
 
     const users = computed(() => userStore.utilisateurs);
@@ -166,12 +168,52 @@ export default {
       closeEditModal();
     };
 
-    const deleteUser = async (id) => {
-      if (confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ?")) {
-        await userStore.deleteUtilisateur(id);
-        await userStore.loadDataFromApi();
-      }
-    };
+    // const deleteUser = async (id) => {
+    //   if (confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ?")) {
+    //     await userStore.deleteUtilisateur(id);
+    //     await userStore.loadDataFromApi();
+    //   }
+    // };
+
+ 
+
+const deleteUser = async (id) => {
+  try {
+    // Affichage de la confirmation avec SweetAlert2
+    const result = await Swal.fire({
+      title: 'Êtes-vous sûr de vouloir supprimer cet utilisateur ?',
+      text: "Cette action est irréversible.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Oui, supprimer',
+      cancelButtonText: 'Annuler',
+      reverseButtons: true
+    });
+
+    // Si l'utilisateur confirme la suppression
+    if (result.isConfirmed) {
+      console.log("Suppression de la utilisateur avec l'ID :", id);
+      await userStore.deleteUtilisateur(id);
+      await userStore.loadDataFromApi(); // Recharge les données après suppression
+      Swal.fire(
+        'Supprimé!',
+        'L\'utilisateur a été supprimé avec succès.',
+        'success'
+      );
+    } else {
+      console.log("Suppression annulée.");
+    }
+  } catch (error) {
+    console.error("Erreur lors de la suppression : ", error);
+    Swal.fire(
+      'Erreur',
+      "Une erreur s'est produite lors de la suppression de l'utilisateur. Veuillez réessayer.",
+      'error'
+    );
+  }
+};
+
+
 
     return {
       users,

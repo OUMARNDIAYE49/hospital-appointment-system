@@ -57,7 +57,7 @@
       const login = async () => {
         try {
           await authStore.login(credentials.value);
-          router.push('/appointments');
+          router.push('/calendar');
         } catch (error) {
           alert("Échec de la connexion : vérifiez vos identifiants.");
           console.error("Erreur lors de la connexion :", error.response?.data || error.message);

@@ -117,6 +117,7 @@ import { useAppointmentStore } from '@/store/appointmentStore';
 import { usePatientStore } from '@/store/patientStore';
 import { useRouter } from 'vue-router';
 import { useUtilisateurStore } from '@/store/userStore';
+import Swal from 'sweetalert2';
 
 export default {
   name: 'AppointmentList',
@@ -179,16 +180,54 @@ export default {
 };
 
 
+// const deleteAppointment = async (id) => {
+//   if (confirm("Voulez-vous vraiment supprimer ce rendez-vous ?")) {
+//     console.log("Suppression de l'ID :", id);
+//     try {
+//       await appointmentStore.deleteAppointment(id);
+//       await appointmentStore.loadDataFromApi(); // Recharge les données après suppression
+//       console.log("Rendez-vous supprimé avec succès");
+//     } catch (error) {
+//       console.error("Erreur lors de la suppression :", error);
+//     }
+//   }
+// };
+
+// import Swal from 'sweetalert2';
+
 const deleteAppointment = async (id) => {
-  if (confirm("Voulez-vous vraiment supprimer ce rendez-vous ?")) {
-    console.log("Suppression de l'ID :", id);
-    try {
+  try {
+    // Affichage de l'alerte de confirmation avec SweetAlert2
+    const result = await Swal.fire({
+      title: 'Voulez-vous vraiment supprimer ce rendez-vous ?',
+      text: "Cette action est irréversible.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Oui, supprimer',
+      cancelButtonText: 'Annuler',
+      reverseButtons: true
+    });
+
+    // Si l'utilisateur confirme la suppression
+    if (result.isConfirmed) {
+      console.log("Suppression de l'ID :", id);
       await appointmentStore.deleteAppointment(id);
       await appointmentStore.loadDataFromApi(); // Recharge les données après suppression
-      console.log("Rendez-vous supprimé avec succès");
-    } catch (error) {
-      console.error("Erreur lors de la suppression :", error);
+      Swal.fire(
+        'Supprimé!',
+        'Le rendez-vous a été supprimé.',
+        'success'
+      );
+    } else {
+      console.log("Suppression annulée.");
     }
+  } catch (error) {
+    console.error("Erreur lors de la suppression :", error);
+    Swal.fire(
+      'Erreur',
+      'Une erreur est survenue lors de la suppression.',
+      'error'
+    );
   }
 };
 

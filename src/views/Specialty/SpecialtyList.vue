@@ -66,6 +66,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useSpecialiteStore } from '@/store/specialityStore';
 import { useRouter } from 'vue-router';
+import Swal from 'sweetalert2';
 
 export default {
   name: 'SpecialiteList',
@@ -113,13 +114,51 @@ export default {
       closeModal();
     };
 
-    const deleteSpecialty = async (id) => {
-      if (confirm("Êtes-vous sûr de vouloir supprimer cette spécialité ?")) {
-        await specialiteStore.deleteSpecialite(id);
-        // Rafraîchit la liste après suppression
-        await specialiteStore.loadDataFromApi();
-      }
-    };
+    // const deleteSpecialty = async (id) => {
+    //   if (confirm("Êtes-vous sûr de vouloir supprimer cette spécialité ?")) {
+    //     await specialiteStore.deleteSpecialite(id);
+    //     // Rafraîchit la liste après suppression
+    //     await specialiteStore.loadDataFromApi();
+    //   }
+    // };
+  
+
+const deleteSpecialty = async (id) => {
+  try {
+    // Affichage de l'alerte de confirmation avec SweetAlert2
+    const result = await Swal.fire({
+      title: 'Êtes-vous sûr de vouloir supprimer cette spécialité ?',
+      text: "Cette action est irréversible.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Oui, supprimer',
+      cancelButtonText: 'Annuler',
+      reverseButtons: true
+    });
+
+    // Si l'utilisateur confirme la suppression
+    if (result.isConfirmed) {
+      console.log("Suppression de la spécialité avec l'ID :", id);
+      await specialiteStore.deleteSpecialite(id);
+      await specialiteStore.loadDataFromApi(); // Rafraîchit la liste après suppression
+      Swal.fire(
+        'Supprimé!',
+        'La spécialité a été supprimée.',
+        'success'
+      );
+    } else {
+      console.log("Suppression annulée.");
+    }
+  } catch (error) {
+    console.error("Erreur lors de la suppression :", error);
+    Swal.fire(
+      'Erreur',
+      'Une erreur est survenue lors de la suppression.',
+      'error'
+    );
+  }
+};
+
 
     return {
       specialties,

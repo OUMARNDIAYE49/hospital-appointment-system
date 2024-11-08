@@ -97,6 +97,7 @@
   import { usePatientStore } from '@/store/patientStore';
   import { ref, onMounted } from 'vue';
   import { useRouter } from 'vue-router';
+  import Swal from 'sweetalert2';
   
   export default {
     name: 'PatientList',
@@ -153,24 +154,57 @@
         }
       };
   
-      const deletePatient = async (id) => {
-        const hasAppointments = await patientStore.checkPatientAppointments(id);
-  
-        if (hasAppointments) {
-          alert("Impossible de supprimer ce patient, il a des rendez-vous.");
-          return;
-        }
-  
-        if (confirm("Êtes-vous sûr de vouloir supprimer ce patient ?")) {
-          try {
-            await patientStore.deletePatient(id);
-            patients.value = patients.value.filter(patient => patient.id !== id);
-          } catch (error) {
-            console.error("Erreur lors de la suppression : ", error);
-            alert("Une erreur s'est produite lors de la suppression du patient. Veuillez réessayer.");
-          }
-        }
-      };
+      
+
+const deletePatient = async (id) => {
+  try {
+    // Vérifie si le patient a des rendez-vous
+    const hasAppointments = await patientStore.checkPatientAppointments(id);
+
+    if (hasAppointments) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Impossible de supprimer',
+        text: "Ce patient a des rendez-vous programmés.",
+      });
+      return;
+    }
+
+    // Affichage de la confirmation avec SweetAlert2
+    const result = await Swal.fire({
+      title: 'Êtes-vous sûr de vouloir supprimer ce patient ?',
+      text: "Cette action est irréversible.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Oui, supprimer',
+      cancelButtonText: 'Annuler',
+      reverseButtons: true
+    });
+
+    // Si l'utilisateur confirme la suppression
+    if (result.isConfirmed) {
+      await patientStore.deletePatient(id);
+      await specialiteStore.loadDataFromApi();
+      // Mise à jour de la liste des patients après suppression
+      patients.value = patients.value.filter(patient => patient.id !== id);
+      Swal.fire(
+        'Supprimé!',
+        'Le patient a été supprimé avec succès.',
+        'success'
+      );
+    } else {
+      console.log("Suppression annulée.");
+    }
+  } catch (error) {
+    console.error("Erreur lors de la suppression : ", error);
+    Swal.fire(
+      'Erreur',
+      "Une erreur s'est produite lors de la suppression du patient. Veuillez réessayer.",
+      'error'
+    );
+  }
+};
+
   
       return {
         patients,
