@@ -33,7 +33,12 @@ export const useUtilisateurStore = defineStore("utilisateurs", {
     async fetchSpecialites() {
       try {
         const response = await axios.get(
-          "http://localhost:3000/api/specialites"
+          "http://localhost:3000/api/specialites",
+          {
+            headers: {
+              Authorization: `Bearer ${auth.token}`,
+            },
+          }
         );
         this.specialites = response.data;
       } catch (error) {

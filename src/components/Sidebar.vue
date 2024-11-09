@@ -16,7 +16,7 @@
       <ul>
         <li>
           <router-link to="/calendar" exact-active-class="active-link" @click="setVerticalMenu">
-            <font-awesome-icon icon="calendar-check" class="sidebar-icon" /> Acceuil
+            <font-awesome-icon icon="house" class="sidebar-icon" /> Acceuil
           </router-link>
         </li>
         <li>
@@ -31,7 +31,7 @@
         </li>
         <li>
           <router-link to="/patients" exact-active-class="active-link" @click="setHorizontalMenu">
-            <font-awesome-icon icon="user" class="sidebar-icon" /> Patients
+            <font-awesome-icon icon="bed" class="sidebar-icon" /> Patients
           </router-link>
         </li>
         <li>

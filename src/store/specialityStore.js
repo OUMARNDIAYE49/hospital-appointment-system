@@ -1,6 +1,7 @@
 // specialiteStore.js
 import { defineStore } from "pinia";
 import axios from "axios";
+import { useAuthStore } from "./authStore";
 
 export const useSpecialiteStore = defineStore("specialites", {
   state: () => ({
@@ -10,8 +11,15 @@ export const useSpecialiteStore = defineStore("specialites", {
   actions: {
     // Charger toutes les spécialités depuis l'API
     async loadDataFromApi() {
+      const auth = useAuthStore();
       try {
-        const response = await axios.get("http://localhost:3000/api/specialites");
+        const response = await axios.get("http://localhost:3000/api/specialites",
+          {
+            headers: {
+              Authorization: `Bearer ${auth.token}`,
+            },
+          }
+        );
         this.specialites = response.data;
         console.log("Spécialités chargées :", this.specialites); // Vérification des données
       } catch (error) {
@@ -22,8 +30,15 @@ export const useSpecialiteStore = defineStore("specialites", {
 
     // Ajouter une nouvelle spécialité
     async addSpecialite(specialite) {
+      const auth = useAuthStore();
       try {
-        const response = await axios.post("http://localhost:3000/api/specialites", specialite);
+        const response = await axios.post("http://localhost:3000/api/specialites", specialite,
+          {
+            headers: {
+              Authorization: `Bearer ${auth.token}`,
+            },
+          }
+        );
         this.specialites.push(response.data);                
         await this.loadDataFromApi();  // Rafraîchir la liste après ajout
       } catch (error) {
@@ -33,9 +48,16 @@ export const useSpecialiteStore = defineStore("specialites", {
     
     // Mettre à jour une spécialité existante
     async updateSpecialite(id, updatedSpecialite) {
+      const auth = useAuthStore();
       try {
         // Envoie la mise à jour à l'API
-        const response = await axios.put(`http://localhost:3000/api/specialites/${id}`, updatedSpecialite);
+        const response = await axios.put(`http://localhost:3000/api/specialites/${id}`, updatedSpecialite,
+          {
+            headers: {
+              Authorization: `Bearer ${auth.token}`,
+            },
+          }
+        );
         
         // Met à jour localement la liste des spécialités
         const index = this.specialites.findIndex(specialite => specialite.id === id);
@@ -52,8 +74,15 @@ export const useSpecialiteStore = defineStore("specialites", {
     
     // Supprimer une spécialité
     async deleteSpecialite(id) {
+      const auth = useAuthStore();
       try {
-        await axios.delete(`http://localhost:3000/api/specialites/${id}`);
+        await axios.delete(`http://localhost:3000/api/specialites/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${auth.token}`,
+            },
+          }
+        );
         this.specialites = this.specialites.filter((specialite) => specialite.id !== id); 
       } catch (error) {
         console.error('Erreur lors de la suppression de la spécialité :', error);

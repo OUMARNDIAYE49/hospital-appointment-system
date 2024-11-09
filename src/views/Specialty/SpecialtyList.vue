@@ -10,15 +10,17 @@
     </div>
 
     <div class="table-responsive">
-      <table class="table table-bordered text-center table-hover">
+      <table class="table table-bordered text-start table-hover">
         <thead>
           <tr>
+            <th>ID</th>
             <th>Nom de la Spécialité</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="specialty in specialties" :key="specialty.id">
+            <td>{{ specialty.id }}</td>
             <td>{{ specialty.nom }}</td>
             <td>
               <font-awesome-icon @click="viewSpecialty(specialty)" icon="eye" class="text-primary mx-2" />

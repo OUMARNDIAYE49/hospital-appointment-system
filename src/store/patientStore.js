@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import axios from "axios";
+import { useAuthStore } from "./authStore";
 
 export const usePatientStore = defineStore("patient", {
   state: () => ({
@@ -9,8 +10,15 @@ export const usePatientStore = defineStore("patient", {
   actions: {
     // Charger tous les patients depuis l'API
     async loadDataFromApi() {  
+      const auth = useAuthStore();
       try {
-        const response = await axios.get("http://localhost:3000/api/patients");
+        const response = await axios.get("http://localhost:3000/api/patients",
+          {
+            headers: {
+              Authorization: `Bearer ${auth.token}`,
+            },
+          }
+        );
         this.patients = response.data;
       } catch (error) {
         console.error("Erreur lors du chargement des patients :", error);
@@ -19,8 +27,15 @@ export const usePatientStore = defineStore("patient", {
 
     // Ajouter un patient
     async addPatient(patient) {
+      const auth = useAuthStore();
       try {
-        const response = await axios.post("http://localhost:3000/api/patients", patient);
+        const response = await axios.post("http://localhost:3000/api/patients", patient,
+          {
+            headers: {
+              Authorization: `Bearer ${auth.token}`,
+            },
+          }
+        );
         this.patients.push(response.data);
         console.log("Patient ajouté avec succès :", response.data);
       } catch (error) {
@@ -30,8 +45,15 @@ export const usePatientStore = defineStore("patient", {
 
     // Mettre à jour un patient
     async updatePatient(id, updatedPatient) {
+      const auth = useAuthStore();
       try {
-        await axios.put(`http://localhost:3000/api/patients/${id}`, updatedPatient);
+        await axios.put(`http://localhost:3000/api/patients/${id}`, updatedPatient,
+          {
+            headers: {
+              Authorization: `Bearer ${auth.token}`,
+            },
+          }
+        );
         const index = this.patients.findIndex((patient) => patient.id === id);
         if (index !== -1) {
           this.patients[index] = { ...this.patients[index], ...updatedPatient };
@@ -44,8 +66,15 @@ export const usePatientStore = defineStore("patient", {
     
     // Supprimer un patient
     async deletePatient(id) {
+      const auth = useAuthStore();
       try {
-        await axios.delete(`http://localhost:3000/api/patients/${id}`);
+        await axios.delete(`http://localhost:3000/api/patients/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${auth.token}`,
+            },
+          }
+        );
         console.log("Patient supprimé avec succès");
         // Recharger la liste des patients après la suppression
         await this.loadDataFromApi(); // Recharge les données
@@ -61,8 +90,15 @@ export const usePatientStore = defineStore("patient", {
 
     // Vérifier si un patient a des rendez-vous associés
     async checkPatientAppointments(id) {
+      const auth = useAuthStore();
       try {
-        const response = await axios.get(`http://localhost:3000/api/patients/${id}/appointments`);
+        const response = await axios.get(`http://localhost:3000/api/patients/${id}/appointments`,
+          {
+            headers: {
+              Authorization: `Bearer ${auth.token}`,
+            },
+          }
+        );
         return response.data.length > 0; // Retourne true si des rendez-vous existent
       } catch (error) {
         console.error("Erreur lors de la vérification des rendez-vous :", error);

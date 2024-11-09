@@ -2,8 +2,8 @@
   <div class="admin-dashboard">
     <div class="header">
       <h1>Ajouter un Patient</h1>
-      <button @click="cancelAdd" class="btn btn-outline-secondary btn-sm">
-        Annuler
+      <button @click="navigateToUserList" class="btn btn-outline-secondary btn-sm">
+        Retour à la Liste
       </button>
     </div>
 
@@ -69,7 +69,9 @@ export default {
         console.error("Erreur lors de l'ajout du patient :", error.response?.data || error.message);
       }
     };
-
+    const navigateToUserList = () => {
+      router.push('/patients');
+    };
     const cancelAdd = () => {
       if (confirm("Êtes-vous sûr de vouloir annuler l'ajout de ce patient ?")) {
         resetForm();
@@ -84,6 +86,7 @@ export default {
       patient,
       addPatient,
       cancelAdd,
+      navigateToUserList
     };
   },
 };

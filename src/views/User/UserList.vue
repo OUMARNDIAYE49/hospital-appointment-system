@@ -11,7 +11,7 @@
     </div>
 
     <div class="table-responsive">
-      <table class="table table-bordered text-center">
+      <table class="table table-bordered text-start">
         <thead>
           <tr>
             <th>ID</th>
@@ -258,7 +258,7 @@ h1 {
   font-weight: bold;
 }
 
-.search-bar {
+/* .search-bar {
   display: flex;
   align-items: center;
   margin-bottom: 20px;
@@ -270,8 +270,8 @@ h1 {
 }
 
 .search-bar input {
-  width: auto; /* Ajustement pour s'adapter à la barre de recherche */
-}
+  width: auto;
+} */
 
 .table {
   width: 100%; /* Assurez-vous que la table occupe toute la largeur du conteneur */

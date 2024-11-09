@@ -1,7 +1,6 @@
 // src/store/authStore.js
 import { defineStore } from "pinia";
 import axios from "axios";
-import { ref } from "vue";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -60,6 +59,28 @@ export const useAuthStore = defineStore("auth", {
     // Récupérer les informations de l'utilisateur connecté
     getUser() {
       return this.user;
+    },
+
+    // Envoi de l'email de réinitialisation du mot de passe
+    async sendPasswordResetEmail(email) {
+      try {
+        await axios.post("http://localhost:3000/api/password/forgot-password", { email });
+        console.log("Email de réinitialisation envoyé à :", email);
+      } catch (error) {
+        console.error("Erreur lors de l'envoi de l'email de réinitialisation :", error);
+        throw error;
+      }
+    },
+
+    // Réinitialisation du mot de passe
+    async resetPassword(token, newPassword) {
+      try {
+        await axios.post("http://localhost:3000/api/password/reset-password", { token, newPassword });
+        console.log("Mot de passe réinitialisé avec succès.");
+      } catch (error) {
+        console.error("Erreur lors de la réinitialisation du mot de passe :", error);
+        throw error;
+      }
     },
   },
 

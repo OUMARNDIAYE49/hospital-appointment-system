@@ -10,7 +10,7 @@
       </div>
   
       <div class="table-responsive">
-        <table class="table table-bordered text-center table-hover">
+        <table class="table table-bordered text-start table-hover">
           <thead>
             <tr>
               <th>ID</th>

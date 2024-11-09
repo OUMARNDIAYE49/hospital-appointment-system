@@ -12,10 +12,14 @@ import AddPatient from '../views/Patient/AddPatient.vue';
 import AddAppointment from '../views/Appointment/AddAppointment.vue';
 import { useAuthStore } from '../store/authStore';
 import CalendarView from '../components/CalendarView.vue';
+import ForgotPassword from '@/components/ForgotPassword.vue';
+import ResetPassword from '@/components/ResetPassword.vue';
 
 
 const routes = [
   { path: '/', name: 'Login', component: Login },
+  { path: '/forgot-password', name: 'ForgotPassword', component: ForgotPassword, },
+  { path: '/reset-password/:token', name: 'ResetPassword', component: ResetPassword },
   
   { 
     path: '/Home', 

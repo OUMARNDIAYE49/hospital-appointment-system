@@ -15,7 +15,7 @@
         <input type="date" id="search-date" v-model="searchDate" @input="filterAppointments" class="form-control" />
       </div> -->
 
-      <table class="table table-hover table-bordered text-center">
+      <table class="table table-hover table-bordered text-start">
         <thead class="thead-dark">
           <tr>
             <th>Date début</th>
@@ -89,7 +89,7 @@
             </div>
 
               <div class="modal-footer">
-                <button type="submit" class="btn btn-success">Enregistrer</button>
+                <button type="submit" class="btn btn-primary">Enregistrer</button>
                 <button type="button" class="btn btn-secondary" @click="closeModal">Annuler</button>
               </div>
             </form>
@@ -328,10 +328,23 @@ const deleteAppointment = async (id) => {
 
 .modal-dialog {
   max-width: 500px;
+  width: 100%;
 }
 
 .modal-footer .btn {
   margin-right: 10px;
+}
+  
+.close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+.modal-header, .modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .action-icon {
