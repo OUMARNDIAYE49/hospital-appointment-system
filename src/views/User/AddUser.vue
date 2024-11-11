@@ -20,7 +20,26 @@
 
       <div class="form-group">
         <label for="password">Mot de Passe:</label>
-        <input type="password" v-model="password" id="password" required class="form-control" />
+        <div class="password-input">
+          <input
+            :type="showPassword ? 'text' : 'password'"
+            v-model="password"
+            id="password"
+            required
+            class="form-control"
+            @input="validatePassword"
+          />
+          <span class="toggle-password" @click="togglePasswordVisibility">
+            <svg v-if="showPassword" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye-off">
+              <path d="M17.94 17.94A10.05 10.05 0 0 1 12 19.5a10 10 0 0 1-9.5-6 9.97 9.97 0 0 1 1.64-2.01M12 5.5a10 10 0 0 1 9.5 6 9.97 9.97 0 0 1-1.64 2.01M3 3l18 18"></path>
+            </svg>
+            <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </span>
+        </div>
+        <small v-if="passwordError" class="text-danger">{{ passwordError }}</small>
       </div>
 
       <div class="form-group">
@@ -51,6 +70,7 @@
 import { useUtilisateurStore } from '@/store/userStore';
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import Swal from 'sweetalert2';
 
 export default {
   name: 'AddUser',
@@ -64,8 +84,27 @@ export default {
     const role = ref('');
     const specialite_id = ref('');
     const specialites = ref([]);
+    const passwordError = ref('');
+    const showPassword = ref(false);
+
+    const togglePasswordVisibility = () => {
+      showPassword.value = !showPassword.value;
+    };
+
+    const validatePassword = () => {
+      const hasLetters = /[A-Za-z]/.test(password.value);
+      const hasNumbers = /\d/.test(password.value);
+      if (!hasLetters || !hasNumbers) {
+        passwordError.value = "Le mot de passe doit contenir des lettres et des chiffres.";
+      } else {
+        passwordError.value = "";
+      }
+    };
 
     const addUser = async () => {
+      validatePassword();
+      if (passwordError.value) return;
+
       const utilisateur = {
         nom: nom.value,
         email: email.value,
@@ -74,11 +113,25 @@ export default {
         specialite_id: role.value === 'ADMIN' ? null : specialite_id.value,
       };
 
+      
       try {
         await utilisateurStore.addUtilisateur(utilisateur);
+        Swal.fire({
+          icon: 'success',
+          title: 'Utilisateur ajouté',
+          text: 'L’utilisateur a été ajouté avec succès!',
+          confirmButtonText: 'OK',
+          timer: 2000,
+        });
         router.push('/users');
       } catch (error) {
         console.error("Erreur lors de l'ajout de l'utilisateur :", error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur',
+          text: "Une erreur est survenue lors de l'ajout de l'utilisateur.",
+          confirmButtonText: 'OK',
+        });
       }
     };
 
@@ -117,6 +170,10 @@ export default {
       addUser,
       navigateToUserList,
       handleRoleChange,
+      validatePassword,
+      passwordError,
+      showPassword,
+      togglePasswordVisibility,
     };
   },
 };
@@ -158,9 +215,21 @@ h1 {
   margin-bottom: 15px;
 }
 
+.password-input {
+  position: relative;
+}
+
 .form-control {
   border-radius: 6px;
   font-size: 1rem;
+}
+
+.toggle-password {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  cursor: pointer;
 }
 
 .btn-primary {
@@ -172,5 +241,10 @@ h1 {
   padding: 4px 12px;
   font-size: 0.85rem;
   border-radius: 6px;
+}
+
+.text-danger {
+  color: #dc3545;
+  font-size: 0.875rem;
 }
 </style>

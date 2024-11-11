@@ -30,6 +30,8 @@
         />
       </div>
 
+      <p v-if="errorMessage" class="text-danger">{{ errorMessage }}</p>
+
       <div class="form-group mb-3">
         <label for="telephone" class="form-label">Téléphone du Patient</label>
         <select
@@ -83,6 +85,7 @@ import { useRouter } from 'vue-router';
 import { usePatientStore } from '@/store/patientStore';
 import { useAppointmentStore } from '@/store/appointmentStore';
 import { useUtilisateurStore } from '@/store/userStore';
+import Swal from 'sweetalert2';
 
 export default {
   name: 'AddAppointment',
@@ -100,6 +103,8 @@ export default {
       status: '',
     });
 
+    const errorMessage = ref('');
+
     onMounted(async () => {
       await userStore.loadDataFromApi();
       await patientStore.loadDataFromApi();
@@ -108,29 +113,74 @@ export default {
     const patients = computed(() => patientStore.patients);
     const medecins = computed(() => userStore.utilisateurs.filter(user => user.role === 'MEDECIN'));
 
-    const addAppointment = async () => {
-      try {
-        const addedAppointment = await appointmentStore.addAppointment({
-          ...newAppointment.value,
-        });
+    const validateDates = () => {
+      const dateDebut = new Date(newAppointment.value.date_debut);
+      const dateFin = new Date(newAppointment.value.date_fin);
 
-        if (addedAppointment) {
-          // Réinitialiser les champs manuellement
-          newAppointment.value.date_debut = '';
-          newAppointment.value.date_fin = '';
-          newAppointment.value.patient_id = '';
-          newAppointment.value.medecin_id = '';
-          newAppointment.value.status = '';
-
-          router.push('/appointments'); // Redirection vers la liste des rendez-vous
-        } else {
-          console.warn("Le rendez-vous n'a pas été ajouté.");
-        }
-      } catch (error) {
-        console.error("Erreur lors de l'ajout du rendez-vous :", error);
-        alert("Erreur lors de l'ajout du rendez-vous : " + error.message);
+      // Vérification que la date de fin n'est pas avant la date de début
+      if (dateFin < dateDebut) {
+        errorMessage.value = "La date de fin ne peut pas être antérieure à la date de début.";
+        return false;
       }
+
+      // Vérification des heures d'ouverture (07:00 à 20:00)
+      const heureDebut = dateDebut.getHours();
+      const heureFin = dateFin.getHours();
+
+      if (heureDebut < 7 || heureDebut >= 20) {
+        errorMessage.value = "L'heure de début doit être entre 07:00 et 20:00.";
+        return false;
+      }
+      if (heureFin < 7 || heureFin > 20) {
+        errorMessage.value = "L'heure de fin doit être entre 07:00 et 20:00.";
+        return false;
+      }
+
+      errorMessage.value = '';
+      return true;
     };
+
+    const addAppointment = async () => {
+  if (!validateDates()) {
+    return;
+  }
+
+  try {
+    const addAppointment = await appointmentStore.addAppointment({
+      ...newAppointment.value,
+    });
+
+    if (newAppointment) {
+      // Réinitialiser les champs manuellement
+      newAppointment.value.date_debut = '';
+      newAppointment.value.date_fin = '';
+      newAppointment.value.patient_id = '';
+      newAppointment.value.medecin_id = '';
+      newAppointment.value.status = '';
+
+      // Afficher l'alerte de succès
+      Swal.fire({
+        title: 'Rendez-vous ajouté !',
+        text: 'Le rendez-vous a été ajouté avec succès.',
+        icon: 'success',
+        confirmButtonText: 'OK'
+      }).then(() => {
+        router.push('/appointments'); // Redirection vers la liste des rendez-vous après confirmation
+      });
+    } else {
+      console.warn("Le rendez-vous n'a pas été ajouté.");
+    }
+  } catch (error) {
+    console.error("Erreur lors de l'ajout du rendez-vous :", error);
+    Swal.fire({
+      title: 'Erreur',
+      text: "Erreur lors de l'ajout du rendez-vous : " + error.message,
+      icon: 'error',
+      confirmButtonText: 'OK'
+    });
+  }
+};
+
 
     const goToList = () => {
       router.push('/appointments');
@@ -138,6 +188,7 @@ export default {
 
     return {
       newAppointment,
+      errorMessage,
       patients,
       medecins,
       addAppointment,

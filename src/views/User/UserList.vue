@@ -134,7 +134,7 @@ export default {
 
     const getSpecialiteName = (id) => {
       const specialite = userStore.specialites.find(spec => spec.id === id);
-      return specialite ? specialite.nom : 'Inconnue';
+      return specialite ? specialite.nom : 'Secrétaire';
     };
 
     const navigateToAddUser = () => {
@@ -162,11 +162,29 @@ export default {
     };
 
     const saveEdit = async () => {
-      const id = selectedUser.value.id;
-      await userStore.updateUtilisateur(id, selectedUser.value);
-      await userStore.loadDataFromApi();
-      closeEditModal();
-    };
+  const id = selectedUser.value.id;
+  try {
+    await userStore.updateUtilisateur(id, selectedUser.value);
+    await userStore.loadDataFromApi();
+    closeEditModal();
+
+    // Affiche une alerte de succès après la modification
+    Swal.fire({
+      title: 'Modifié!',
+      text: 'Les informations de l\'utilisateur ont été mises à jour avec succès.',
+      icon: 'success',
+      confirmButtonText: 'OK'
+    });
+  } catch (error) {
+    console.error("Erreur lors de la modification de l'utilisateur : ", error);
+    Swal.fire({
+      title: 'Erreur',
+      text: "Une erreur s'est produite lors de la modification de l'utilisateur. Veuillez réessayer.",
+      icon: 'error',
+      confirmButtonText: 'OK'
+    });
+  }
+};
 
     // const deleteUser = async (id) => {
     //   if (confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ?")) {
@@ -177,7 +195,7 @@ export default {
 
  
 
-const deleteUser = async (id) => {
+    const deleteUser = async (id) => {
   try {
     // Affichage de la confirmation avec SweetAlert2
     const result = await Swal.fire({
@@ -192,9 +210,14 @@ const deleteUser = async (id) => {
 
     // Si l'utilisateur confirme la suppression
     if (result.isConfirmed) {
-      console.log("Suppression de la utilisateur avec l'ID :", id);
+      console.log("Suppression de l'utilisateur avec l'ID :", id);
+
+      // Appel à la suppression de l'utilisateur
       await userStore.deleteUtilisateur(id);
-      await userStore.loadDataFromApi(); // Recharge les données après suppression
+
+      // Recharge les données après suppression
+      await userStore.loadDataFromApi();
+
       Swal.fire(
         'Supprimé!',
         'L\'utilisateur a été supprimé avec succès.',
@@ -204,15 +227,23 @@ const deleteUser = async (id) => {
       console.log("Suppression annulée.");
     }
   } catch (error) {
-    console.error("Erreur lors de la suppression : ", error);
-    Swal.fire(
-      'Erreur',
-      "Une erreur s'est produite lors de la suppression de l'utilisateur. Veuillez réessayer.",
-      'error'
-    );
+    // Vérifie si l'erreur est due à une association avec une autre table
+    if (error.message.includes('association')) {
+      Swal.fire(
+        'Impossible de supprimer',
+        'Cet utilisateur est associé à d\'autres données. Veuillez d\'abord dissocier ou supprimer ces données.',
+        'warning'
+      );
+    } else {
+      console.error("Erreur lors de la suppression : ", error);
+      Swal.fire(
+        'Erreur',
+        "Une erreur s'est produite lors de la suppression de l'utilisateur. Veuillez réessayer.",
+        'error'
+      );
+    }
   }
 };
-
 
 
     return {
