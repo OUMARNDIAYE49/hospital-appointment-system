@@ -193,11 +193,22 @@ export default {
     //   }
     // };
 
- 
-
     const deleteUser = async (id) => {
   try {
-    // Affichage de la confirmation avec SweetAlert2
+    // Vérifier si l'utilisateur est associé à des rendez-vous
+    const userHasAppointments = await userStore.checkUserAppointments(id);
+
+    if (userHasAppointments) {
+      // Si l'utilisateur est associé à des rendez-vous, afficher un message d'avertissement
+      Swal.fire(
+        'Impossible de supprimer',
+        'Cet utilisateur est associé à des rendez-vous. Veuillez d\'abord dissocier ou supprimer ces rendez-vous.',
+        'warning'
+      );
+      return; // Empêcher la suppression si l'utilisateur est associé à des rendez-vous
+    }
+
+    // Afficher une fenêtre de confirmation avant la suppression
     const result = await Swal.fire({
       title: 'Êtes-vous sûr de vouloir supprimer cet utilisateur ?',
       text: "Cette action est irréversible.",
@@ -210,14 +221,23 @@ export default {
 
     // Si l'utilisateur confirme la suppression
     if (result.isConfirmed) {
-      console.log("Suppression de l'utilisateur avec l'ID :", id);
+      // Afficher un message de chargement
+      Swal.fire({
+        title: 'Suppression en cours...',
+        text: 'Veuillez patienter pendant que nous supprimons cet utilisateur.',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
 
-      // Appel à la suppression de l'utilisateur
+      // Appel à la fonction de suppression de l'utilisateur
       await userStore.deleteUtilisateur(id);
 
-      // Recharge les données après suppression
+      // Recharger les utilisateurs après suppression
       await userStore.loadDataFromApi();
 
+      // Afficher le message de succès
       Swal.fire(
         'Supprimé!',
         'L\'utilisateur a été supprimé avec succès.',
@@ -227,23 +247,17 @@ export default {
       console.log("Suppression annulée.");
     }
   } catch (error) {
-    // Vérifie si l'erreur est due à une association avec une autre table
-    if (error.message.includes('association')) {
-      Swal.fire(
-        'Impossible de supprimer',
-        'Cet utilisateur est associé à d\'autres données. Veuillez d\'abord dissocier ou supprimer ces données.',
-        'warning'
-      );
-    } else {
-      console.error("Erreur lors de la suppression : ", error);
-      Swal.fire(
-        'Erreur',
-        "Une erreur s'est produite lors de la suppression de l'utilisateur. Veuillez réessayer.",
-        'error'
-      );
-    }
+    console.error("Erreur lors de la suppression : ", error);
+    // Afficher une alerte d'erreur plus précise si la suppression échoue
+    Swal.fire(
+      'Erreur',
+      "Une erreur s'est produite lors de la suppression de l'utilisateur. Veuillez réessayer.",
+      'error'
+    );
   }
 };
+
+
 
 
     return {

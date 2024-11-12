@@ -133,6 +133,7 @@ export default {
     const editMode = ref(false);
     const selectedAppointment = ref({});
     const searchDate = ref('');
+    const errorMessage = ref('');
 
     const viewAppointment = (appointment) => {
       selectedAppointment.value = {
@@ -147,10 +148,10 @@ export default {
     const editAppointment = (appointment) => {
       selectedAppointment.value = {
         id: appointment.id,
-        date_debut: appointment.date_debut,
-        date_fin: appointment.date_fin,
+        date_debut: new Date(appointment.date_debut).toISOString().slice(0, 16),
+        date_fin: new Date(appointment.date_fin).toISOString().slice(0, 16),
         status: appointment.status,
-        patient: appointment.patient || { nom: '', telephone: '' },
+        patient: appointment.patient || { nom: '', telephone: '', id: null },
         medecin: appointment.medecin || { nom: '', id: null }
       };
       showModal.value = true;
@@ -162,76 +163,110 @@ export default {
       selectedAppointment.value = {};
     };
 
-    const saveEdit = async () => {
-  if (selectedAppointment.value.id) {
-    const updatedAppointment = {
-      id: selectedAppointment.value.id,
-      date_debut: selectedAppointment.value.date_debut,
-      date_fin: selectedAppointment.value.date_fin,
-      status: selectedAppointment.value.status,
-      patient_id: selectedAppointment.value.patient.id, // Utilise l'ID du patient
-      medecin_id: selectedAppointment.value.medecin.id // Utilise l'ID du médecin
+    // Validation des dates
+    const validateDates = () => {
+      const dateDebut = new Date(selectedAppointment.value.date_debut);
+      const dateFin = new Date(selectedAppointment.value.date_fin);
+
+      if (dateFin < dateDebut) {
+        errorMessage.value = "La date de fin ne peut pas être antérieure à la date de début.";
+        return false;
+      }
+
+      const heureDebut = dateDebut.getHours();
+      const heureFin = dateFin.getHours();
+
+      if (heureDebut < 7 || heureDebut >= 20) {
+        errorMessage.value = "L'heure de début doit être entre 07:00 et 20:00.";
+        return false;
+      }
+      if (heureFin < 7 || heureFin > 20) {
+        errorMessage.value = "L'heure de fin doit être entre 07:00 et 20:00.";
+        return false;
+      }
+
+      errorMessage.value = ''; // Réinitialise le message d'erreur si toutes les validations sont correctes
+      return true;
     };
 
-    await appointmentStore.updateAppointment(selectedAppointment.value.id, updatedAppointment);
-    await appointmentStore.loadDataFromApi();
-    closeModal();
-  }
-};
+    // Sauvegarder l'édition
+    const saveEdit = async () => {
+      // Valider les dates avant de sauvegarder
+      if (!validateDates()) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur de validation',
+          text: errorMessage.value
+        });
+        return;
+      }
 
+      if (selectedAppointment.value.id) {
+        const updatedAppointment = {
+          id: selectedAppointment.value.id,
+          date_debut: selectedAppointment.value.date_debut,
+          date_fin: selectedAppointment.value.date_fin,
+          status: selectedAppointment.value.status,
+          patient_id: selectedAppointment.value.patient.id, // Utilise l'ID du patient
+          medecin_id: selectedAppointment.value.medecin.id // Utilise l'ID du médecin
+        };
 
-// const deleteAppointment = async (id) => {
-//   if (confirm("Voulez-vous vraiment supprimer ce rendez-vous ?")) {
-//     console.log("Suppression de l'ID :", id);
-//     try {
-//       await appointmentStore.deleteAppointment(id);
-//       await appointmentStore.loadDataFromApi(); // Recharge les données après suppression
-//       console.log("Rendez-vous supprimé avec succès");
-//     } catch (error) {
-//       console.error("Erreur lors de la suppression :", error);
-//     }
-//   }
-// };
+        // Appel pour mettre à jour le rendez-vous
+        await appointmentStore.updateAppointment(selectedAppointment.value.id, updatedAppointment);
 
-// import Swal from 'sweetalert2';
+        // Recharger les données de l'API
+        await appointmentStore.loadDataFromApi();
 
-const deleteAppointment = async (id) => {
-  try {
-    // Affichage de l'alerte de confirmation avec SweetAlert2
-    const result = await Swal.fire({
-      title: 'Voulez-vous vraiment supprimer ce rendez-vous ?',
-      text: "Cette action est irréversible.",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Oui, supprimer',
-      cancelButtonText: 'Annuler',
-      reverseButtons: true
-    });
+        // Fermer le modal
+        closeModal();
 
-    // Si l'utilisateur confirme la suppression
-    if (result.isConfirmed) {
-      console.log("Suppression de l'ID :", id);
-      await appointmentStore.deleteAppointment(id);
-      await appointmentStore.loadDataFromApi(); // Recharge les données après suppression
-      Swal.fire(
-        'Supprimé!',
-        'Le rendez-vous a été supprimé.',
-        'success'
-      );
-    } else {
-      console.log("Suppression annulée.");
-    }
-  } catch (error) {
-    console.error("Erreur lors de la suppression :", error);
-    Swal.fire(
-      'Erreur',
-      'Une erreur est survenue lors de la suppression.',
-      'error'
-    );
-  }
-};
+        // Afficher l'alerte de succès
+        Swal.fire({
+          icon: 'success',
+          title: 'Modification réussie',
+          text: 'Le rendez-vous a été modifié avec succès.'
+        });
+      }
+    };
 
+    // Supprimer un rendez-vous avec confirmation
+    const deleteAppointment = async (id) => {
+      try {
+        // Affichage de l'alerte de confirmation avec SweetAlert2
+        const result = await Swal.fire({
+          title: 'Voulez-vous vraiment supprimer ce rendez-vous ?',
+          text: "Cette action est irréversible.",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Oui, supprimer',
+          cancelButtonText: 'Annuler',
+          reverseButtons: true
+        });
 
+        // Si l'utilisateur confirme la suppression
+        if (result.isConfirmed) {
+          console.log("Suppression de l'ID :", id);
+          await appointmentStore.deleteAppointment(id);
+          await appointmentStore.loadDataFromApi(); // Recharge les données après suppression
+          Swal.fire(
+            'Supprimé!',
+            'Le rendez-vous a été supprimé.',
+            'success'
+          );
+        } else {
+          console.log("Suppression annulée.");
+        }
+      } catch (error) {
+        console.error("Erreur lors de la suppression :", error);
+        Swal.fire(
+          'Erreur',
+          'Une erreur est survenue lors de la suppression.',
+          'error'
+        );
+      }
+    };
+
+    // Rediriger vers la page d'ajout de rendez-vous
     const navigateToAddAppointment = () => {
       router.push('/add-appointment');
     };
@@ -260,6 +295,7 @@ const deleteAppointment = async (id) => {
   }
 };
 </script>
+
 
 
 

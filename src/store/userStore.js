@@ -22,15 +22,14 @@ export const useUtilisateurStore = defineStore("utilisateurs", {
           }
         );
         this.utilisateurs = response.data;
-
-        // Appeler fetchSpecialites pour charger les spécialités
-        await this.fetchSpecialites();
+        await this.fetchSpecialites(); // Charger les spécialités après avoir récupéré les utilisateurs
       } catch (error) {
         console.error("Erreur lors du chargement des utilisateurs :", error);
       }
     },
 
     async fetchSpecialites() {
+      const auth = useAuthStore();
       try {
         const response = await axios.get(
           "http://localhost:3000/api/specialites",
@@ -80,23 +79,18 @@ export const useUtilisateurStore = defineStore("utilisateurs", {
           (utilisateur) => utilisateur.id === id
         );
         if (index !== -1) {
-          this.utilisateurs[index] = {
-            ...this.utilisateurs[index],
-            ...utilisateurMiseAJour,
-          };
+          this.utilisateurs[index] = { ...this.utilisateurs[index], ...utilisateurMiseAJour };
         }
       } catch (error) {
-        console.error(
-          "Erreur lors de la mise à jour de l'utilisateur :",
-          error
-        );
+        console.error("Erreur lors de la mise à jour de l'utilisateur :", error);
       }
     },
 
     async deleteUtilisateur(id) {
       const auth = useAuthStore();
       try {
-        await axios.delete(`http://localhost:3000/api/utilisateurs/${id}`,
+        await axios.delete(
+          `http://localhost:3000/api/utilisateurs/${id}`,
           {
             headers: {
               Authorization: `Bearer ${auth.token}`,
@@ -107,10 +101,25 @@ export const useUtilisateurStore = defineStore("utilisateurs", {
           (utilisateur) => utilisateur.id !== id
         );
       } catch (error) {
-        console.error(
-          "Erreur lors de la suppression de l'utilisateur :",
-          error
+        console.error("Erreur lors de la suppression de l'utilisateur :", error);
+      }
+    },
+
+    async checkUserAppointments(id) {
+      const authStore = useAuthStore(); // Utiliser useAuthStore pour accéder au store d'authentification
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/api/rendezvous?utilisateurId=${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${authStore.token}`, // Utiliser le token provenant du store auth
+            },
+          }
         );
+        return response.data.length > 0; // Retourne true si des rendez-vous sont trouvés
+      } catch (error) {
+        console.error("Erreur lors de la vérification des rendez-vous :", error);
+        return false; // Retourne false en cas d'erreur
       }
     },
   },
