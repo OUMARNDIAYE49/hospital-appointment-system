@@ -134,7 +134,7 @@ export default {
 
     const getSpecialiteName = (id) => {
       const specialite = userStore.specialites.find(spec => spec.id === id);
-      return specialite ? specialite.nom : 'Secrétaire';
+      return specialite ? specialite.nom : '';
     };
 
     const navigateToAddUser = () => {

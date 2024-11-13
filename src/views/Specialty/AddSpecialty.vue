@@ -29,6 +29,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useSpecialiteStore } from '@/store/specialityStore';
+import Swal from 'sweetalert2';
 
 export default {
   name: 'AddSpecialty',
@@ -41,15 +42,40 @@ export default {
     });
 
     const addSpecialty = async () => {
-      if (specialty.value.nom.trim()) {
-        try {
-          await specialiteStore.addSpecialite(specialty.value);
-          router.push('/specialties');
-        } catch (error) {
-          console.error("Erreur lors de l'ajout de la spécialité :", error.response?.data || error.message);
-        }
-      } else {
-        alert("Veuillez entrer un nom de spécialité valide.");
+      if (!specialty.value.nom.trim()) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Champ requis',
+          text: 'Veuillez entrer un nom de spécialité valide.',
+        });
+        return;
+      }
+      
+      // Vérifier l'unicité avant d'ajouter
+      if (!specialiteStore.isUniqueSpeciality(specialty.value.nom)) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Doublon',
+          text: 'Cette spécialité existe déjà.',
+        });
+        return;
+      }
+
+      try {
+        await specialiteStore.addSpecialite(specialty.value);
+        Swal.fire({
+          icon: 'success',
+          title: 'Succès',
+          text: 'Spécialité ajoutée avec succès !',
+        });
+        router.push('/specialties');
+      } catch (error) {
+        console.error("Erreur lors de l'ajout de la spécialité :", error.response?.data || error.message);
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur',
+          text: 'Erreur lors de l\'ajout de la spécialité.',
+        });
       }
     };
 

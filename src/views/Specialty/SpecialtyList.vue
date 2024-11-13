@@ -104,63 +104,76 @@ export default {
     };
 
     const saveEdit = async () => {
-      const id = selectedSpecialty.value.id;
-      await specialiteStore.updateSpecialite(id, selectedSpecialty.value);
-
-      // Mettre à jour directement dans la liste pour voir les changements en temps réel
-      const index = specialties.value.findIndex(specialty => specialty.id === id);
-      if (index !== -1) {
-        specialties.value[index] = { ...selectedSpecialty.value };
+      // Vérifie si le nom existe déjà dans une autre spécialité
+      if (specialties.value.some(specialty => specialty.nom === selectedSpecialty.value.nom && specialty.id !== selectedSpecialty.value.id)) {
+        await Swal.fire({
+          icon: 'warning',
+          title: 'Nom déjà utilisé',
+          text: 'Ce nom de spécialité existe déjà. Veuillez en choisir un autre.',
+          confirmButtonText: 'OK'
+        });
+        return;
       }
 
-      closeModal();
+      try {
+        const id = selectedSpecialty.value.id;
+        await specialiteStore.updateSpecialite(id, selectedSpecialty.value);
+
+        // Met à jour directement la liste pour voir les changements en temps réel
+        const index = specialties.value.findIndex(specialty => specialty.id === id);
+        if (index !== -1) {
+          specialties.value[index] = { ...selectedSpecialty.value };
+        }
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Modifié!',
+          text: 'La spécialité a été modifiée avec succès.',
+          confirmButtonText: 'OK'
+        });
+
+        closeModal();
+      } catch (error) {
+        console.error("Erreur lors de la modification de la spécialité :", error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur',
+          text: 'Une erreur est survenue lors de la modification de la spécialité.',
+          confirmButtonText: 'OK'
+        });
+      }
     };
 
-    // const deleteSpecialty = async (id) => {
-    //   if (confirm("Êtes-vous sûr de vouloir supprimer cette spécialité ?")) {
-    //     await specialiteStore.deleteSpecialite(id);
-    //     // Rafraîchit la liste après suppression
-    //     await specialiteStore.loadDataFromApi();
-    //   }
-    // };
-  
+    const deleteSpecialty = async (id) => {
+      try {
+        const result = await Swal.fire({
+          title: 'Êtes-vous sûr de vouloir supprimer cette spécialité ?',
+          text: "Cette action est irréversible.",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Oui, supprimer',
+          cancelButtonText: 'Annuler',
+          reverseButtons: true
+        });
 
-const deleteSpecialty = async (id) => {
-  try {
-    // Affichage de l'alerte de confirmation avec SweetAlert2
-    const result = await Swal.fire({
-      title: 'Êtes-vous sûr de vouloir supprimer cette spécialité ?',
-      text: "Cette action est irréversible.",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Oui, supprimer',
-      cancelButtonText: 'Annuler',
-      reverseButtons: true
-    });
-
-    // Si l'utilisateur confirme la suppression
-    if (result.isConfirmed) {
-      console.log("Suppression de la spécialité avec l'ID :", id);
-      await specialiteStore.deleteSpecialite(id);
-      await specialiteStore.loadDataFromApi(); // Rafraîchit la liste après suppression
-      Swal.fire(
-        'Supprimé!',
-        'La spécialité a été supprimée.',
-        'success'
-      );
-    } else {
-      console.log("Suppression annulée.");
-    }
-  } catch (error) {
-    console.error("Erreur lors de la suppression :", error);
-    Swal.fire(
-      'Erreur',
-      'Une erreur est survenue lors de la suppression.',
-      'error'
-    );
-  }
-};
-
+        if (result.isConfirmed) {
+          await specialiteStore.deleteSpecialite(id);
+          await specialiteStore.loadDataFromApi();
+          Swal.fire(
+            'Supprimé!',
+            'La spécialité a été supprimée.',
+            'success'
+          );
+        }
+      } catch (error) {
+        console.error("Erreur lors de la suppression :", error);
+        Swal.fire(
+          'Erreur',
+          'Une erreur est survenue lors de la suppression.',
+          'error'
+        );
+      }
+    };
 
     return {
       specialties,

@@ -1,4 +1,3 @@
-// specialiteStore.js
 import { defineStore } from "pinia";
 import axios from "axios";
 import { useAuthStore } from "./authStore";
@@ -28,9 +27,20 @@ export const useSpecialiteStore = defineStore("specialites", {
       }
     },
 
+    // Vérification de l'unicité de la spécialité par son nom
+    isUniqueSpeciality(nom) {
+      return !this.specialites.some(specialite => specialite.nom === nom);
+    },
+
     // Ajouter une nouvelle spécialité
     async addSpecialite(specialite) {
       const auth = useAuthStore();
+
+      // Vérification de l'unicité
+      if (!this.isUniqueSpeciality(specialite.nom)) {
+        throw new Error("Cette spécialité existe déjà.");
+      }
+
       try {
         const response = await axios.post("http://localhost:3000/api/specialites", specialite,
           {
@@ -39,18 +49,18 @@ export const useSpecialiteStore = defineStore("specialites", {
             },
           }
         );
-        this.specialites.push(response.data);                
+        this.specialites.push(response.data);
         await this.loadDataFromApi();  // Rafraîchir la liste après ajout
       } catch (error) {
-        console.error("Erreur lors de l'ajout de la spécialité :", error);              
+        console.error("Erreur lors de l'ajout de la spécialité :", error);
+        throw error;  // Relancer l'erreur pour gestion côté vue
       }
     },
-    
+
     // Mettre à jour une spécialité existante
     async updateSpecialite(id, updatedSpecialite) {
       const auth = useAuthStore();
       try {
-        // Envoie la mise à jour à l'API
         const response = await axios.put(`http://localhost:3000/api/specialites/${id}`, updatedSpecialite,
           {
             headers: {
@@ -59,19 +69,18 @@ export const useSpecialiteStore = defineStore("specialites", {
           }
         );
         
-        // Met à jour localement la liste des spécialités
         const index = this.specialites.findIndex(specialite => specialite.id === id);
         if (index !== -1) {
-          this.specialites[index] = { ...this.specialites[index], ...response.data }; 
+          this.specialites[index] = { ...this.specialites[index], ...response.data };
         }
         console.log("Spécialité mise à jour avec succès :", response.data);
-        return true;  // Succès
+        return true;
       } catch (error) {
         console.error("Erreur lors de la mise à jour de la spécialité :", error);
-        return false;  // Échec
+        return false;
       }
     },
-    
+
     // Supprimer une spécialité
     async deleteSpecialite(id) {
       const auth = useAuthStore();
@@ -83,13 +92,13 @@ export const useSpecialiteStore = defineStore("specialites", {
             },
           }
         );
-        this.specialites = this.specialites.filter((specialite) => specialite.id !== id); 
+        this.specialites = this.specialites.filter((specialite) => specialite.id !== id);
       } catch (error) {
         console.error('Erreur lors de la suppression de la spécialité :', error);
         throw error;
       }
     },
-    
+
     // Récupérer une spécialité par son ID
     getSpecialiteById(id) {
       return this.specialites.find(specialite => specialite.id === id);
