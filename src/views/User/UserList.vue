@@ -127,7 +127,6 @@ export default {
 
     onMounted(() => {
       userStore.loadDataFromApi();
-      
     });
 
     const users = computed(() => userStore.utilisateurs);
@@ -161,54 +160,66 @@ export default {
       selectedUser.value = {};
     };
 
+    // Vérification de l'unicité de l'email
+    const checkEmailUnique = async (email, userId) => {
+      const existingUser = users.value.find(user => user.email === email && user.id !== userId);
+      return !existingUser;
+    };
+
     const saveEdit = async () => {
-  const id = selectedUser.value.id;
+      const id = selectedUser.value.id;
+      const email = selectedUser.value.email;
+
+      // Vérifier l'unicité de l'email avant d'enregistrer
+      const isEmailUnique = await checkEmailUnique(email, id);
+      if (!isEmailUnique) {
+        Swal.fire({
+          title: 'Erreur',
+          text: "L'email est déjà utilisé par un autre utilisateur.",
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+        return;
+      }
+
+      try {
+        await userStore.updateUtilisateur(id, selectedUser.value);
+        await userStore.loadDataFromApi();
+        closeEditModal();
+
+        // Affiche une alerte de succès après la modification
+        Swal.fire({
+          title: 'Modifié!',
+          text: 'Les informations de l\'utilisateur ont été mises à jour avec succès.',
+          icon: 'success',
+          confirmButtonText: 'OK'
+        });
+      } catch (error) {
+        console.error("Erreur lors de la modification de l'utilisateur : ", error);
+        Swal.fire({
+          title: 'Erreur',
+          text: "Une erreur s'est produite lors de la modification de l'utilisateur. Veuillez réessayer.",
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+      }
+    };
+
+   const deleteUser = async (id) => {
   try {
-    await userStore.updateUtilisateur(id, selectedUser.value);
-    await userStore.loadDataFromApi();
-    closeEditModal();
-
-    // Affiche une alerte de succès après la modification
-    Swal.fire({
-      title: 'Modifié!',
-      text: 'Les informations de l\'utilisateur ont été mises à jour avec succès.',
-      icon: 'success',
-      confirmButtonText: 'OK'
-    });
-  } catch (error) {
-    console.error("Erreur lors de la modification de l'utilisateur : ", error);
-    Swal.fire({
-      title: 'Erreur',
-      text: "Une erreur s'est produite lors de la modification de l'utilisateur. Veuillez réessayer.",
-      icon: 'error',
-      confirmButtonText: 'OK'
-    });
-  }
-};
-
-    // const deleteUser = async (id) => {
-    //   if (confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ?")) {
-    //     await userStore.deleteUtilisateur(id);
-    //     await userStore.loadDataFromApi();
-    //   }
-    // };
-
-    const deleteUser = async (id) => {
-  try {
-    // Vérifier si l'utilisateur est associé à des rendez-vous
+    // Vérifier si l'utilisateur a des rendez-vous associés
     const userHasAppointments = await userStore.checkUserAppointments(id);
 
     if (userHasAppointments) {
-      // Si l'utilisateur est associé à des rendez-vous, afficher un message d'avertissement
       Swal.fire(
         'Impossible de supprimer',
         'Cet utilisateur est associé à des rendez-vous. Veuillez d\'abord dissocier ou supprimer ces rendez-vous.',
         'warning'
       );
-      return; // Empêcher la suppression si l'utilisateur est associé à des rendez-vous
+      return;
     }
 
-    // Afficher une fenêtre de confirmation avant la suppression
+    // Confirmation avant suppression
     const result = await Swal.fire({
       title: 'Êtes-vous sûr de vouloir supprimer cet utilisateur ?',
       text: "Cette action est irréversible.",
@@ -219,66 +230,46 @@ export default {
       reverseButtons: true
     });
 
-    // Si l'utilisateur confirme la suppression
+    // Si l'utilisateur confirme, procéder à la suppression
     if (result.isConfirmed) {
-      // Afficher un message de chargement
-      Swal.fire({
-        title: 'Suppression en cours...',
-        text: 'Veuillez patienter pendant que nous supprimons cet utilisateur.',
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        }
-      });
-
-      // Appel à la fonction de suppression de l'utilisateur
       await userStore.deleteUtilisateur(id);
-
-      // Recharger les utilisateurs après suppression
-      await userStore.loadDataFromApi();
-
-      // Afficher le message de succès
+      await userStore.loadDataFromApi(); // Recharger les données après la suppression
       Swal.fire(
         'Supprimé!',
         'L\'utilisateur a été supprimé avec succès.',
         'success'
       );
-    } else {
-      console.log("Suppression annulée.");
     }
   } catch (error) {
-    console.error("Erreur lors de la suppression : ", error);
-    // Afficher une alerte d'erreur plus précise si la suppression échoue
-    Swal.fire(
-      'Erreur',
-      "Une erreur s'est produite lors de la suppression de l'utilisateur. Veuillez réessayer.",
-      'error'
-    );
+    console.error("Erreur lors de la suppression de l'utilisateur : ", error);
+    Swal.fire({
+      title: 'Erreur',
+      text: "Une erreur s'est produite lors de la suppression de l'utilisateur. Veuillez réessayer.",
+      icon: 'error',
+      confirmButtonText: 'OK'
+    });
   }
 };
 
 
-
-
     return {
       users,
+      specialites,
+      showDetailsModal,
+      showEditModal,
+      selectedUser,
+      getSpecialiteName,
       navigateToAddUser,
       viewUser,
       editUser,
       closeDetailsModal,
       closeEditModal,
       saveEdit,
-      deleteUser,
-      showDetailsModal,
-      showEditModal,
-      selectedUser,
-      getSpecialiteName,
-      specialites,
+      deleteUser
     };
-  },
+  }
 };
 </script>
-
 
 
 <style scoped>

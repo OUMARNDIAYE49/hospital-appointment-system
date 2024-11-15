@@ -89,27 +89,23 @@ export const useUtilisateurStore = defineStore("utilisateurs", {
     async deleteUtilisateur(id) {
       const auth = useAuthStore();
       try {
-        await axios.delete(
-          `http://localhost:3000/api/utilisateurs/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${auth.token}`,
-            },
-          }
-        );
-        this.utilisateurs = this.utilisateurs.filter(
-          (utilisateur) => utilisateur.id !== id
-        );
+        await axios.delete(`http://localhost:3000/api/utilisateurs/${id}`, {
+          headers: { Authorization: `Bearer ${auth.token}` },
+        });
+        this.utilisateurs = this.utilisateurs.filter((utilisateur) => utilisateur.id !== id);
+        return true; // Indicateur de succès
       } catch (error) {
         console.error("Erreur lors de la suppression de l'utilisateur :", error);
+        return false; // Retourne false en cas d'erreur
       }
     },
+    
 
     async checkUserAppointments(id) {
       const authStore = useAuthStore(); // Utiliser useAuthStore pour accéder au store d'authentification
       try {
         const response = await axios.get(
-          `http://localhost:3000/api/rendezvous?utilisateurId=${id}`,
+          `http://localhost:3000/api/utilisateurs/${id}/appointments`,
           {
             headers: {
               Authorization: `Bearer ${authStore.token}`, // Utiliser le token provenant du store auth

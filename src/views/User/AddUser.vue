@@ -102,38 +102,52 @@ export default {
     };
 
     const addUser = async () => {
-      validatePassword();
-      if (passwordError.value) return;
+  validatePassword();
+  if (passwordError.value) return;
 
-      const utilisateur = {
-        nom: nom.value,
-        email: email.value,
-        password: password.value,
-        role: role.value,
-        specialite_id: role.value === 'ADMIN' ? null : specialite_id.value,
-      };
+  // Vérifier l'unicité de l'email
+  const emailExists = utilisateurStore.utilisateurs.some(
+    (user) => user.email === email.value
+  );
 
-      
-      try {
-        await utilisateurStore.addUtilisateur(utilisateur);
-        Swal.fire({
-          icon: 'success',
-          title: 'Utilisateur ajouté',
-          text: 'L’utilisateur a été ajouté avec succès!',
-          confirmButtonText: 'OK',
-          timer: 2000,
-        });
-        router.push('/users');
-      } catch (error) {
-        console.error("Erreur lors de l'ajout de l'utilisateur :", error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Erreur',
-          text: "Une erreur est survenue lors de l'ajout de l'utilisateur.",
-          confirmButtonText: 'OK',
-        });
-      }
-    };
+  if (emailExists) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Email déjà utilisé',
+      text: 'Cet email est déjà associé à un autre utilisateur.',
+      confirmButtonText: 'OK',
+    });
+    return; // Empêche l'ajout si l'email existe déjà
+  }
+
+  const utilisateur = {
+    nom: nom.value,
+    email: email.value,
+    password: password.value,
+    role: role.value,
+    specialite_id: role.value === 'ADMIN' ? null : specialite_id.value,
+  };
+
+  try {
+    await utilisateurStore.addUtilisateur(utilisateur);
+    Swal.fire({
+      icon: 'success',
+      title: 'Utilisateur ajouté',
+      text: 'L’utilisateur a été ajouté avec succès!',
+      confirmButtonText: 'OK',
+      timer: 2000,
+    });
+    router.push('/users');
+  } catch (error) {
+    console.error("Erreur lors de l'ajout de l'utilisateur :", error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Erreur',
+      text: "Une erreur est survenue lors de l'ajout de l'utilisateur.",
+      confirmButtonText: 'OK',
+    });
+  }
+};
 
     const handleRoleChange = () => {
       if (role.value === 'ADMIN') {

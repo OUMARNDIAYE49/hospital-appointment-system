@@ -151,79 +151,82 @@ export default {
       selectedPatient.value = {};
     };
 
+    const checkUniqueFields = async () => {
+      const existingPhone = patients.value.find(patient => patient.telephone === selectedPatient.value.telephone && patient.id !== selectedPatient.value.id);
+      const existingEmail = patients.value.find(patient => patient.email === selectedPatient.value.email && patient.id !== selectedPatient.value.id);
+
+      if (existingPhone) {
+        await Swal.fire('Erreur', 'Le téléphone est déjà utilisé par un autre patient.', 'error');
+        return false;
+      }
+
+      if (existingEmail) {
+        await Swal.fire('Erreur', 'L\'email est déjà utilisé par un autre patient.', 'error');
+        return false;
+      }
+
+      return true;
+    };
+
     const saveEdit = async () => {
       try {
+        const isUnique = await checkUniqueFields();
+        if (!isUnique) return;
+
         if (selectedPatient.value.id) {
           await patientStore.updatePatient(selectedPatient.value.id, selectedPatient.value);
           Swal.fire('Succès', 'Modification réussie', 'success');
         } else {
           await patientStore.addPatient(selectedPatient.value);
         }
+
         await loadPatients();
         closeModal();
       } catch (error) {
         console.error("Erreur lors de la sauvegarde : ", error);
+        Swal.fire('Erreur', 'Une erreur est survenue lors de la sauvegarde.', 'error');
       }
     };
 
     const deletePatient = async (id) => {
-  try {
-    // Vérification de l'existence des rendez-vous pour le patient
-    const hasAppointments = await patientStore.checkPatientAppointments(id);
+      try {
+        const hasAppointments = await patientStore.checkPatientAppointments(id);
 
-    if (hasAppointments) {
-      await Swal.fire({
-        icon: 'error',
-        title: 'Suppression impossible',
-        text: "Ce patient a des rendez-vous programmés. Veuillez annuler les rendez-vous avant de supprimer le patient.",
-      });
-      return; // Sort de la fonction sans procéder à la suppression
-    }
+        if (hasAppointments) {
+          await Swal.fire({
+            icon: 'error',
+            title: 'Suppression impossible',
+            text: "Ce patient a des rendez-vous programmés. Veuillez annuler les rendez-vous avant de supprimer le patient.",
+          });
+          return;
+        }
 
-    // Si aucun rendez-vous n'est trouvé, confirme la suppression
-    const result = await Swal.fire({
-      title: 'Êtes-vous sûr de vouloir supprimer ce patient ?',
-      text: "Cette action est irréversible.",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Oui, supprimer',
-      cancelButtonText: 'Annuler',
-      reverseButtons: true
-    });
+        const result = await Swal.fire({
+          title: 'Êtes-vous sûr de vouloir supprimer ce patient ?',
+          text: "Cette action est irréversible.",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Oui, supprimer',
+          cancelButtonText: 'Annuler',
+          reverseButtons: true
+        });
 
-    if (result.isConfirmed) {
-      // Supprime le patient uniquement si l'utilisateur confirme
-      const deleteResult = await patientStore.deletePatient(id);
+        if (result.isConfirmed) {
+          const deleteResult = await patientStore.deletePatient(id);
+          if (deleteResult) {
+            await patientStore.loadDataFromApi();
+            patients.value = patients.value.filter(patient => patient.id !== id);
 
-      if (deleteResult) { // Assurez-vous que la suppression a réussi
-        await patientStore.loadDataFromApi();
-        patients.value = patients.value.filter(patient => patient.id !== id);
-
-        await Swal.fire(
-          'Supprimé!',
-          'Le patient a été supprimé avec succès.',
-          'success'
-        );
-      } else {
-        await Swal.fire(
-          'Erreur',
-          "Une erreur s'est produite lors de la suppression du patient. Veuillez réessayer.",
-          'error'
-        );
+            await Swal.fire('Supprimé!', 'Le patient a été supprimé avec succès.', 'success');
+          } else {
+            await Swal.fire('Erreur', "Suppression impossible, Ce patient a des rendez-vous programmés.", 'error');
+          }
+        }
+      } catch (error) {
+        console.error("Erreur lors de la suppression : ", error);
+        await Swal.fire('Erreur', "Ce patient a des rendez-vous programmés.", 'error');
       }
-    } else {
-      console.log("Suppression annulée.");
-    }
-  } catch (error) {
-    console.error("Erreur lors de la suppression : ", error);
-    await Swal.fire(
-      'Erreur',
-      "Une erreur s'est produite lors de la suppression du patient. Veuillez réessayer.",
-      'error'
-    );
-  }
-};
-
+    };
 
     return {
       patients,

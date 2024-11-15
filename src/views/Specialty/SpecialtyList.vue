@@ -169,7 +169,7 @@ export default {
         console.error("Erreur lors de la suppression :", error);
         Swal.fire(
           'Erreur',
-          'Une erreur est survenue lors de la suppression.',
+          'Suppression impossible, Cette specialité est associé a des utilisateurs.',
           'error'
         );
       }

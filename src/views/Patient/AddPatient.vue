@@ -42,6 +42,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { usePatientStore } from '@/store/patientStore';
+import Swal from 'sweetalert2';
 
 export default {
   name: 'AddPatient',
@@ -61,17 +62,57 @@ export default {
       await patientStore.loadDataFromApi();
     });
 
+    const checkUniqueFields = async () => {
+      const existingPatientByPhone = patientStore.patients.find(p => p.telephone === patient.value.telephone);
+      const existingPatientByEmail = patientStore.patients.find(p => p.email === patient.value.email);
+
+      if (existingPatientByPhone) {
+        Swal.fire({
+          title: 'Erreur',
+          text: 'Le téléphone est déjà utilisé par un autre patient.',
+          icon: 'error',
+        });
+        return false;
+      }
+
+      if (existingPatientByEmail) {
+        Swal.fire({
+          title: 'Erreur',
+          text: 'L\'email est déjà utilisé par un autre patient.',
+          icon: 'error',
+        });
+        return false;
+      }
+
+      return true;
+    };
+
     const addPatient = async () => {
+      const isUnique = await checkUniqueFields();
+      if (!isUnique) return;
+
       try {
         await patientStore.addPatient(patient.value);
+        Swal.fire({
+          title: 'Succès',
+          text: 'Patient ajouté avec succès !',
+          icon: 'success',
+        });
         router.push('/patients');
       } catch (error) {
         console.error("Erreur lors de l'ajout du patient :", error.response?.data || error.message);
+        Swal.fire({
+          title: 'Erreur',
+          text: 'Une erreur est survenue lors de l\'ajout du patient.',
+          icon: 'error',
+        });
       }
     };
+
     const navigateToUserList = () => {
       router.push('/patients');
     };
+
     const cancelAdd = () => {
       if (confirm("Êtes-vous sûr de vouloir annuler l'ajout de ce patient ?")) {
         resetForm();
