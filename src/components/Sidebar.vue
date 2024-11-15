@@ -4,7 +4,13 @@
     <div class="topbar">
       <h1>Gestion des Rendez-vous</h1>
       <div class="topbar-actions">
-        <a href="#" @click.prevent="logout">
+        <!-- Bouton avec nom de l'utilisateur -->
+        <button class="user-button">
+          <font-awesome-icon icon="user" class="user-icon" />
+          <span v-if="authStore.getUser()">{{ authStore.getUser().nom }}</span>
+        </button>
+        <!-- Bouton déconnexion -->
+        <a href="#" @click.prevent="logout" class="logout-button">
           <font-awesome-icon icon="sign-out-alt" /> Déconnecter
         </a>
       </div>
@@ -16,7 +22,7 @@
       <ul>
         <li>
           <router-link to="/calendar" exact-active-class="active-link" @click="setVerticalMenu">
-            <font-awesome-icon icon="house" class="sidebar-icon" /> Acceuil
+            <font-awesome-icon icon="house" class="sidebar-icon" /> Accueil
           </router-link>
         </li>
         <li>
@@ -24,17 +30,22 @@
             <font-awesome-icon icon="calendar-check" class="sidebar-icon" /> Rendez-vous
           </router-link>
         </li>
-        <li>
+
+        <!-- Vérification du rôle pour afficher la gestion des utilisateurs -->
+        <li v-if="authStore.getUser()?.role !== 'MEDECIN'">
           <router-link to="/users" exact-active-class="active-link" @click="setHorizontalMenu">
             <font-awesome-icon icon="user-md" class="sidebar-icon" /> Utilisateurs
           </router-link>
         </li>
-        <li>
+
+        
+          <li v-if="authStore.getUser()?.role !== 'MEDECIN'">
           <router-link to="/patients" exact-active-class="active-link" @click="setHorizontalMenu">
             <font-awesome-icon icon="bed" class="sidebar-icon" /> Patients
           </router-link>
         </li>
-        <li>
+      
+          <li v-if="authStore.getUser()?.role !== 'MEDECIN'">
           <router-link to="/specialties" exact-active-class="active-link" @click="setHorizontalMenu">
             <font-awesome-icon icon="stethoscope" class="sidebar-icon" /> Spécialités
           </router-link>
@@ -46,23 +57,49 @@
 </template>
 
 <script>
+import { useAuthStore } from "@/store/authStore";
+import Swal from "sweetalert2";
+
 export default {
-  name: 'SidebarWithTopbar',
+  name: "SidebarWithTopbar",
+  computed: {
+    authStore() {
+      return useAuthStore();
+    },
+  },
   methods: {
     setHorizontalMenu() {
-      this.$emit('toggle-navbar', false);
+      this.$emit("toggle-navbar", false);
     },
     setVerticalMenu() {
-      this.$emit('toggle-navbar', true);
+      this.$emit("toggle-navbar", true);
     },
     logout() {
-      // Suppression du token ou des données de session
-      localStorage.removeItem('token'); // ou sessionStorage.removeItem('token')
-      
-      // Redirection vers la page de connexion
-      this.$router.push('/');
+      Swal.fire({
+        title: "Déconnexion",
+        text: "Êtes-vous sûr de vouloir vous déconnecter ?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Oui, déconnectez-moi",
+        cancelButtonText: "Annuler",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const authStore = useAuthStore();
+          authStore.logout();
+          this.$router.push({
+            name: "Login",
+            query: { message: "Déconnexion réussie" },
+          });
+        }
+      });
+    },
+  },
+  mounted() {
+    const authStore = useAuthStore();
+    if (!authStore.isAuthenticated()) {
+      this.$router.push({ name: "Login", query: { message: "Veuillez vous connecter." } });
     }
-  }
+  },
 };
 </script>
 
@@ -71,8 +108,8 @@ export default {
 .topbar {
   height: 70px;
   width: 100%;
-  background-color: #3b5998; /* Couleur de fond de la topbar */
-  color: #ffffff; /* Couleur du texte de la topbar */
+  background-color: #3b5998;
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -90,27 +127,57 @@ export default {
   font-weight: bold;
 }
 
-.topbar-actions a {
-  color: #ffffff; /* Couleur des liens de la topbar */
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* Bouton utilisateur */
+.user-button {
+  display: flex;
+  align-items: center;
+  background-color: #f1c40f;
+  color: #3b5998;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.user-button:hover {
+  background-color: #d4ac0d;
+}
+
+.user-icon {
+  margin-right: 8px;
+}
+
+/* Bouton déconnexion */
+.logout-button {
+  color: #ffffff;
   text-decoration: none;
   display: flex;
   align-items: center;
   padding: 8px 12px;
-  background-color: #e74c3c; /* Couleur du bouton de déconnexion */
+  background-color: #e74c3c;
   border-radius: 5px;
   transition: background-color 0.3s;
 }
 
-.topbar-actions a:hover {
-  background-color: #c0392b; /* Couleur du bouton au survol */
+.logout-button:hover {
+  background-color: #c0392b;
 }
 
 /* Sidebar styling */
 .sidebar {
   width: 250px;
   height: calc(100vh - 70px);
-  background-color: #3b5998; /* Couleur de fond de la sidebar */
-  color: #ecf0f1; /* Couleur du texte de la sidebar */
+  background-color: #3b5998;
+  color: #ecf0f1;
   padding: 20px;
   position: fixed;
   top: 70px;
@@ -125,7 +192,7 @@ export default {
   margin-bottom: 20px;
   font-size: 1.4em;
   font-weight: 600;
-  color: #f1c40f; /* Couleur du titre de la sidebar */
+  color: #f1c40f;
 }
 
 .sidebar ul {
@@ -139,7 +206,7 @@ export default {
 }
 
 .sidebar a {
-  color: #ecf0f1; /* Couleur du texte des liens de la sidebar */
+  color: #ecf0f1;
   text-decoration: none;
   display: flex;
   align-items: center;
@@ -149,19 +216,18 @@ export default {
 }
 
 .sidebar a:hover {
-  background-color: #3b5998; /* Couleur de fond au survol des liens */
-  color: #f1c40f; /* Couleur du texte au survol des liens */
+  background-color: #3b5998;
+  color: #f1c40f;
 }
 
 /* Active link style */
 .active-link {
-  background-color: #3b5998; /* Couleur de fond du lien actif */
-  color: #f1c40f; /* Couleur du texte du lien actif */
-  font-weight: bold; /* Rendre le lien actif en gras */
+  background-color: #3b5998;
+  color: #f1c40f;
+  font-weight: bold;
 }
 
-/* Spacing between icon and text */
 .sidebar-icon {
-  margin-right: 10px; /* Espace entre l'icône et le lien */
+  margin-right: 10px;
 }
 </style>
