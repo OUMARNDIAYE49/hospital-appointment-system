@@ -53,14 +53,17 @@
               <div class="form-group">
                 <label>Nom</label>
                 <input v-model="selectedPatient.nom" class="form-control" required />
+                <small v-if="errors.nom" class="text-danger">{{ errors.nom }}</small>
               </div>
               <div class="form-group">
                 <label>Téléphone</label>
                 <input v-model="selectedPatient.telephone" class="form-control" required />
+                <small v-if="errors.telephone" class="text-danger">{{ errors.telephone }}</small>
               </div>
               <div class="form-group">
                 <label>Email</label>
                 <input v-model="selectedPatient.email" type="email" class="form-control" required />
+                <small v-if="errors.email" class="text-danger">{{ errors.email }}</small>
               </div>
               <div class="form-group">
                 <label>Date de Naissance</label>
@@ -109,6 +112,11 @@ export default {
     const editMode = ref(false);
     const selectedPatient = ref({});
     const patients = ref([]);
+    const errors = ref({
+      nom: '',
+      telephone: '',
+      email: ''
+    });
 
     onMounted(async () => {
       await loadPatients();
@@ -149,6 +157,31 @@ export default {
     const closeModal = () => {
       showModal.value = false;
       selectedPatient.value = {};
+      errors.value = { nom: '', telephone: '', email: '' }; 
+    };
+
+    const validateForm = () => {
+      let isValid = true;
+      errors.value = { nom: '', telephone: '', email: '' };
+
+      if (selectedPatient.value.nom.length < 3) {
+        errors.value.nom = "Le nom doit contenir au moins 3 caractères.";
+        isValid = false;
+      }
+
+      const phoneRegex = /^[0-9+]+$/;
+      if (!phoneRegex.test(selectedPatient.value.telephone) || selectedPatient.value.telephone.length < 8) {
+        errors.value.telephone = "Le téléphone doit être un nombre et contenir au moins 8 chiffres.";
+        isValid = false;
+      }
+
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!emailRegex.test(selectedPatient.value.email)) {
+        errors.value.email = "L'email doit être valide (ex: aa@gmail.com).";
+        isValid = false;
+      }
+
+      return isValid;
     };
 
     const checkUniqueFields = async () => {
@@ -169,6 +202,9 @@ export default {
     };
 
     const saveEdit = async () => {
+      const isValid = validateForm();
+      if (!isValid) return;
+
       try {
         const isUnique = await checkUniqueFields();
         if (!isUnique) return;
@@ -188,64 +224,72 @@ export default {
       }
     };
 
-    const deletePatient = async (id) => {
-      try {
-        const hasAppointments = await patientStore.checkPatientAppointments(id);
-
-        if (hasAppointments) {
-          await Swal.fire({
-            icon: 'error',
-            title: 'Suppression impossible',
-            text: "Ce patient a des rendez-vous programmés. Veuillez annuler les rendez-vous avant de supprimer le patient.",
-          });
-          return;
-        }
-
-        const result = await Swal.fire({
-          title: 'Êtes-vous sûr de vouloir supprimer ce patient ?',
-          text: "Cette action est irréversible.",
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonText: 'Oui, supprimer',
-          cancelButtonText: 'Annuler',
-          reverseButtons: true
-        });
-
-        if (result.isConfirmed) {
-          const deleteResult = await patientStore.deletePatient(id);
-          if (deleteResult) {
-            await patientStore.loadDataFromApi();
-            patients.value = patients.value.filter(patient => patient.id !== id);
-
-            await Swal.fire('Supprimé!', 'Le patient a été supprimé avec succès.', 'success');
-          } else {
-            await Swal.fire('Erreur', "Suppression impossible, Ce patient a des rendez-vous programmés.", 'error');
-          }
-        }
-      } catch (error) {
-        console.error("Erreur lors de la suppression : ", error);
-        await Swal.fire('Erreur', "Ce patient a des rendez-vous programmés.", 'error');
-      }
+    const navigateToAddPatient = () => {
+      router.push('/add-patient');
     };
 
+    const deletePatient = async (id) => {
+  try {
+    // Vérifier si le patient a des rendez-vous programmés
+    const hasAppointments = await patientStore.checkPatientAppointments(id);
+
+    // Si le patient a des rendez-vous, empêcher la suppression
+    if (hasAppointments) {
+      await Swal.fire({
+        icon: 'error',
+        title: 'Suppression impossible',
+        text: "Ce patient a des rendez-vous programmés. Veuillez annuler les rendez-vous avant de supprimer le patient.",
+      });
+      return;
+    }
+
+    // Demander confirmation avant de supprimer
+    const result = await Swal.fire({
+      title: 'Êtes-vous sûr de vouloir supprimer ce patient ?',
+      text: "Cette action est irréversible.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Oui, supprimer',
+      cancelButtonText: 'Annuler',
+      reverseButtons: true
+    });
+
+    if (result.isConfirmed) {
+      const deleteResult = await patientStore.deletePatient(id);
+      if (deleteResult) {
+        await patientStore.loadDataFromApi();
+        patients.value = patients.value.filter(patient => patient.id !== id);
+        await Swal.fire('Supprimé!', 'Le patient a été supprimé avec succès.', 'success');
+      } else {
+        await Swal.fire('Erreur', "Suppression impossible, Ce patient a des rendez-vous programmés.", 'error');
+      }
+    }
+  } catch (error) {
+    console.error("Erreur lors de la suppression : ", error);
+    await Swal.fire('Erreur', "Une erreur est survenue lors de la suppression du patient.", 'error');
+  }
+};
+
     return {
-      patients,
-      formatDate,
-      navigateToAddPatient: () => router.push('/add-patient'),
-      viewPatient,
-      editPatient,
-      deletePatient,
       showModal,
       editMode,
       selectedPatient,
+      patients,
+      errors,
+      loadPatients,
+      formatDate,
+      formatToDateInput,
+      viewPatient,
+      editPatient,
       closeModal,
       saveEdit,
+      navigateToAddPatient,
+      deletePatient
     };
-  },
+  }
 };
 </script>
 
-  
   <style scoped>
   .patient-dashboard {
     display: flex;

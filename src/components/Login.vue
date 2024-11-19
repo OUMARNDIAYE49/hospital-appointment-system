@@ -1,41 +1,78 @@
 <template>
-  <div class="admin-dashboard">
-    <h1 class="text-center mb-4">Connexion</h1>
-    <form @submit.prevent="login" class="shadow-lg p-4 rounded bg-white">
-      <div class="form-group mb-3">
-        <label for="email" class="form-label">Email</label>
-        <input
-          type="email"
-          id="email"
-          v-model="credentials.email"
-          class="form-control"
-          placeholder="Entrez votre email"
-          required
-        />
-      </div>
+  <h1 class="text-center mb-4">Connexion</h1>
+  <form @submit.prevent="login" class="shadow-lg p-4 rounded bg-white">
+    <div class="form-group mb-3">
+      <label for="email" class="form-label">Email</label>
+      <input
+        type="email"
+        id="email"
+        v-model="credentials.email"
+        class="form-control"
+        placeholder="Entrez votre email"
+        required
+      />
+    </div>
 
-      <div class="form-group mb-3">
-        <label for="password" class="form-label">Mot de passe</label>
+    <div class="form-group mb-3 position-relative password-field">
+      <label for="password" class="form-label">Mot de passe</label>
+      <div class="input-wrapper">
         <input
-          type="password"
+          :type="showPassword ? 'text' : 'password'"
           id="password"
           v-model="credentials.password"
           class="form-control"
           placeholder="Entrez votre mot de passe"
           required
         />
+        <span class="toggle-password" @click="togglePasswordVisibility">
+          <svg
+            v-if="showPassword"
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="feather feather-eye-off"
+          >
+            <path
+              d="M17.94 17.94A10.05 10.05 0 0 1 12 19.5a10 10 0 0 1-9.5-6 9.97 9.97 0 0 1 1.64-2.01M12 5.5a10 10 0 0 1 9.5 6 9.97 9.97 0 0 1-1.64 2.01M3 3l18 18"
+            ></path>
+          </svg>
+          <svg
+            v-else
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="feather feather-eye"
+          >
+            <path
+              d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+            ></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        </span>
       </div>
+    </div>
 
-      <div class="text-end mb-4">
-        <a href="/forgot-password" class="forgot-password-link">Mot de passe oublié ?</a>
-      </div>
+    <div class="text-end mb-4">
+      <a href="/forgot-password" class="forgot-password-link">Mot de passe oublié ?</a>
+    </div>
 
-      <div class="d-flex justify-content-between">
-        <button type="submit" class="btn btn-primary">Se connecter</button>
-        <button type="button" class="btn btn-outline-secondary" @click="resetForm">Annuler</button>
-      </div>
-    </form>
-  </div>
+    <div class="d-flex justify-content-between">
+      <button type="submit" class="btn btn-primary">Se connecter</button>
+      <button type="button" class="btn btn-outline-secondary" @click="resetForm">Annuler</button>
+    </div>
+  </form>
 </template>
 
 <script>
@@ -55,6 +92,12 @@ export default {
       password: "",
     });
 
+    const showPassword = ref(false);
+
+    const togglePasswordVisibility = () => {
+      showPassword.value = !showPassword.value;
+    };
+
     const login = async () => {
       try {
         await authStore.login(credentials.value);
@@ -62,9 +105,6 @@ export default {
         const user = authStore.getUser();
         const role = user?.role || "non défini";
 
-        console.log("Rôle de l'utilisateur connecté :", role);
-
-        // Afficher une alerte SweetAlert2 après une connexion réussie
         Swal.fire({
           icon: "success",
           title: "Connexion réussie",
@@ -76,7 +116,6 @@ export default {
           timer: 3000,
         });
 
-        // Rediriger l'utilisateur
         router.push("/calendar");
       } catch (error) {
         Swal.fire({
@@ -95,6 +134,8 @@ export default {
 
     return {
       credentials,
+      showPassword,
+      togglePasswordVisibility,
       login,
       resetForm,
     };
@@ -103,23 +144,17 @@ export default {
 </script>
 
 <style scoped>
-.admin-dashboard {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 20px;
-  padding: 20px;
-}
-
 h1 {
   color: #004085;
   font-weight: bold;
   margin-top: 25px;
+  text-align: center;
 }
 
 form {
-  max-width: 600px;
+  max-width: 400px;
   width: 100%;
+  margin: 0 auto;
   border-radius: 8px;
 }
 
@@ -127,8 +162,24 @@ form {
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
-.form-group {
-  margin-bottom: 1.5rem;
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-wrapper .form-control {
+  padding-right: 40px;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+  color: #6c757d;
+  display: flex;
+  align-items: center;
+  height: 100%;
 }
 
 .btn {

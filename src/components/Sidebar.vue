@@ -4,11 +4,32 @@
     <div class="topbar">
       <h1>Gestion des Rendez-vous</h1>
       <div class="topbar-actions">
-        <!-- Bouton avec nom de l'utilisateur -->
-        <button class="user-button">
-          <font-awesome-icon icon="user" class="user-icon" />
-          <span v-if="authStore.getUser()">{{ authStore.getUser().nom }}</span>
-        </button>
+        <!-- Bouton avec dropdown -->
+        <div class="btn-group">
+          <button
+            type="button"
+            class="btn btn-outline-secondary dropdown-toggle"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            <font-awesome-icon icon="user" class="user-icon" />
+            <span v-if="authStore.getUser()">{{ authStore.getUser().nom }}</span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li>
+              <router-link to="/edit-user" class="dropdown-item">
+                <font-awesome-icon icon="user-edit" class="dropdown-icon" />
+                Profil
+              </router-link>
+            </li>
+            <li>
+              <router-link to="/change-password" class="dropdown-item">
+                <font-awesome-icon icon="key" class="dropdown-icon" />
+                Changer mot de passe
+              </router-link>
+            </li>
+          </ul>
+        </div>
         <!-- Bouton déconnexion -->
         <a href="#" @click.prevent="logout" class="logout-button">
           <font-awesome-icon icon="sign-out-alt" /> Déconnecter
@@ -21,33 +42,55 @@
       <h2>Menu</h2>
       <ul>
         <li>
-          <router-link to="/calendar" exact-active-class="active-link" @click="setVerticalMenu">
+          <router-link
+            to="/calendar"
+            exact-active-class="active-link"
+            @click="setVerticalMenu"
+          >
             <font-awesome-icon icon="house" class="sidebar-icon" /> Accueil
           </router-link>
         </li>
         <li>
-          <router-link to="/appointments" exact-active-class="active-link" @click="setVerticalMenu">
-            <font-awesome-icon icon="calendar-check" class="sidebar-icon" /> Rendez-vous
+          <router-link
+            to="/appointments"
+            exact-active-class="active-link"
+            @click="setVerticalMenu"
+          >
+            <font-awesome-icon icon="calendar-check" class="sidebar-icon" />
+            Rendez-vous
           </router-link>
         </li>
 
         <!-- Vérification du rôle pour afficher la gestion des utilisateurs -->
         <li v-if="authStore.getUser()?.role !== 'MEDECIN'">
-          <router-link to="/users" exact-active-class="active-link" @click="setHorizontalMenu">
-            <font-awesome-icon icon="user-md" class="sidebar-icon" /> Utilisateurs
+          <router-link
+            to="/users"
+            exact-active-class="active-link"
+            @click="setHorizontalMenu"
+          >
+            <font-awesome-icon icon="user-md" class="sidebar-icon" />
+            Utilisateurs
           </router-link>
         </li>
 
-        
-          <li v-if="authStore.getUser()?.role !== 'MEDECIN'">
-          <router-link to="/patients" exact-active-class="active-link" @click="setHorizontalMenu">
+        <li v-if="authStore.getUser()?.role !== 'MEDECIN'">
+          <router-link
+            to="/patients"
+            exact-active-class="active-link"
+            @click="setHorizontalMenu"
+          >
             <font-awesome-icon icon="bed" class="sidebar-icon" /> Patients
           </router-link>
         </li>
-      
-          <li v-if="authStore.getUser()?.role !== 'MEDECIN'">
-          <router-link to="/specialties" exact-active-class="active-link" @click="setHorizontalMenu">
-            <font-awesome-icon icon="stethoscope" class="sidebar-icon" /> Spécialités
+
+        <li v-if="authStore.getUser()?.role !== 'MEDECIN'">
+          <router-link
+            to="/specialties"
+            exact-active-class="active-link"
+            @click="setHorizontalMenu"
+          >
+            <font-awesome-icon icon="stethoscope" class="sidebar-icon" />
+            Spécialités
           </router-link>
         </li>
       </ul>
@@ -97,7 +140,10 @@ export default {
   mounted() {
     const authStore = useAuthStore();
     if (!authStore.isAuthenticated()) {
-      this.$router.push({ name: "Login", query: { message: "Veuillez vous connecter." } });
+      this.$router.push({
+        name: "Login",
+        query: { message: "Veuillez vous connecter." },
+      });
     }
   },
 };
@@ -121,6 +167,15 @@ export default {
   z-index: 1000;
 }
 
+.btn-outline-secondary {
+  color: #f2f5f8;
+  border: 1px solid #6c757d;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #d4ac0d;
+}
+
 .topbar h1 {
   margin: 0;
   font-size: 1.5em;
@@ -134,24 +189,6 @@ export default {
 }
 
 /* Bouton utilisateur */
-.user-button {
-  display: flex;
-  align-items: center;
-  background-color: #f1c40f;
-  color: #3b5998;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 5px;
-  font-size: 1em;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.user-button:hover {
-  background-color: #d4ac0d;
-}
-
 .user-icon {
   margin-right: 8px;
 }

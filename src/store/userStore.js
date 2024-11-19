@@ -28,6 +28,25 @@ export const useUtilisateurStore = defineStore("utilisateurs", {
       }
     },
 
+
+    async updateCurrentUser(nom, email) {
+      const auth = useAuthStore();
+      try {
+        const response = await axios.put("http://localhost:3000/api/user/update", { nom, email },{
+          headers: {
+            Authorization: `Bearer ${auth.token}`,
+          },
+        });
+
+        return response.data.utilisateurs;
+      } catch (error) {
+        console.error("Erreur lors de la mise à jour des informations :", error);
+        // toast.error("Erreur lors de la mise à jour des informations");
+        throw error;
+      }
+    },
+
+
     async fetchSpecialites() {
       const auth = useAuthStore();
       try {

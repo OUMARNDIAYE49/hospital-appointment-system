@@ -29,8 +29,9 @@
         </thead>
         <tbody>
           <tr v-for="appointment in appointmentStore.appointments" :key="appointment.id">
-            <td>{{ appointment.date_debut }}</td>
-            <td>{{ appointment.date_fin }}</td>
+            <td>{{ formatDate(appointment.date_debut) }}</td>
+<td>{{ formatDate(appointment.date_fin) }}</td>
+
             <td v-if="appointment.patient">{{ appointment.patient.nom }}</td>
             <td v-if="appointment.patient">{{ appointment.patient.telephone }}</td>
             <td v-if="appointment.medecin">{{ appointment.medecin.nom }}</td>
@@ -94,8 +95,9 @@
               </div>
             </form>
             <div v-else>
-              <p><strong>Date début :</strong> {{ selectedAppointment.date_debut }}</p>
-              <p><strong>Date fin :</strong> {{ selectedAppointment.date_fin }}</p>
+              <p><strong>Date début :</strong> {{ formatDate(selectedAppointment.date_debut) }}</p>
+<p><strong>Date fin :</strong> {{ formatDate(selectedAppointment.date_fin) }}</p>
+
               <p><strong>Statut :</strong> {{ selectedAppointment.status }}</p>
               <p><strong>Nom du Patient :</strong> {{ selectedAppointment.patient.nom }}</p>
               <p><strong>Téléphone :</strong> {{ selectedAppointment.patient.telephone }}</p>
@@ -134,6 +136,17 @@ export default {
     const selectedAppointment = ref({});
     const searchDate = ref('');
     const errorMessage = ref('');
+    
+    const formatDate = (date) => {
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    
+    return `${day}/${month}/${year} ${hours}:${minutes}`;
+  };
 
     const viewAppointment = (appointment) => {
       selectedAppointment.value = {
@@ -167,6 +180,13 @@ export default {
     const validateDates = () => {
       const dateDebut = new Date(selectedAppointment.value.date_debut);
       const dateFin = new Date(selectedAppointment.value.date_fin);
+
+      const today = new Date();
+  if (dateDebut < today) {
+    errorMessage.value = "La date de début ne peut pas être dans le passé.";
+    return false;
+  }
+
 
       if (dateFin < dateDebut) {
         errorMessage.value = "La date de fin ne peut pas être antérieure à la date de début.";
@@ -266,7 +286,6 @@ export default {
       }
     };
 
-    // Rediriger vers la page d'ajout de rendez-vous
     const navigateToAddAppointment = () => {
       router.push('/add-appointment');
     };
@@ -291,13 +310,11 @@ export default {
       saveEdit,
       deleteAppointment,
       navigateToAddAppointment,
+      formatDate
     };
   }
 };
 </script>
-
-
-
 
 <style scoped>
 .admin-dashboard {

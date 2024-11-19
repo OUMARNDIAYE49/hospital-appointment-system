@@ -14,6 +14,7 @@ import { useAuthStore } from '../store/authStore';
 import CalendarView from '../components/CalendarView.vue';
 import ForgotPassword from '@/components/ForgotPassword.vue';
 import ResetPassword from '@/components/ResetPassword.vue';
+import EditCurrentUser from '../views/User/EditCurrent!user.vue';
 
 
 const routes = [
@@ -36,6 +37,7 @@ const routes = [
       { path: '/add-specialties', name: 'AddSpecialty', component: AddSpecialty, meta: { requiresAuth: true } },
       { path: '/patients', name: 'PatientList', component: PatientList, meta: { requiresAuth: true } },
       { path: '/add-appointment', name: 'AddAppointment', component: AddAppointment, meta: { requiresAuth: true } },
+      { path: '/edit-user', name: 'edit-user', component: EditCurrentUser, meta: { requiresAuth: true } },
     ]
   }
 ];

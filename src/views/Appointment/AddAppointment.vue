@@ -15,6 +15,7 @@
           id="date_debut" 
           v-model="newAppointment.date_debut" 
           class="form-control" 
+          :min="minDate" 
           required 
         />
       </div>
@@ -26,6 +27,7 @@
           id="date_fin" 
           v-model="newAppointment.date_fin" 
           class="form-control" 
+          :min="minDate" 
           required 
         />
       </div>
@@ -113,9 +115,29 @@ export default {
     const patients = computed(() => patientStore.patients);
     const medecins = computed(() => userStore.utilisateurs.filter(user => user.role === 'MEDECIN'));
 
+    // Calcul de la date minimale (aujourd'hui)
+    const minDate = computed(() => {
+      const today = new Date();
+      today.setMinutes(today.getMinutes() - today.getTimezoneOffset()); // Ajuste pour le fuseau horaire
+      return today.toISOString().slice(0, 16); // Format yyyy-mm-ddThh:mm
+    });
+
     const validateDates = () => {
       const dateDebut = new Date(newAppointment.value.date_debut);
       const dateFin = new Date(newAppointment.value.date_fin);
+      const now = new Date();
+
+      // Vérification que la date de début n'est pas dans le passé
+      if (dateDebut < now) {
+        errorMessage.value = "La date de début ne peut pas être inférieure à la date actuelle.";
+        return false;
+      }
+
+      // Vérification que la date de fin n'est pas dans le passé
+      if (dateFin < now) {
+        errorMessage.value = "La date de fin ne peut pas être inférieure à la date actuelle.";
+        return false;
+      }
 
       // Vérification que la date de fin n'est pas avant la date de début
       if (dateFin < dateDebut) {
@@ -141,46 +163,45 @@ export default {
     };
 
     const addAppointment = async () => {
-  if (!validateDates()) {
-    return;
-  }
+      if (!validateDates()) {
+        return;
+      }
 
-  try {
-    const addAppointment = await appointmentStore.addAppointment({
-      ...newAppointment.value,
-    });
+      try {
+        const addAppointment = await appointmentStore.addAppointment({
+          ...newAppointment.value,
+        });
 
-    if (newAppointment) {
-      // Réinitialiser les champs manuellement
-      newAppointment.value.date_debut = '';
-      newAppointment.value.date_fin = '';
-      newAppointment.value.patient_id = '';
-      newAppointment.value.medecin_id = '';
-      newAppointment.value.status = '';
+        if (newAppointment) {
+          // Réinitialiser les champs manuellement
+          newAppointment.value.date_debut = '';
+          newAppointment.value.date_fin = '';
+          newAppointment.value.patient_id = '';
+          newAppointment.value.medecin_id = '';
+          newAppointment.value.status = '';
 
-      // Afficher l'alerte de succès
-      Swal.fire({
-        title: 'Rendez-vous ajouté !',
-        text: 'Le rendez-vous a été ajouté avec succès.',
-        icon: 'success',
-        confirmButtonText: 'OK'
-      }).then(() => {
-        router.push('/appointments'); // Redirection vers la liste des rendez-vous après confirmation
-      });
-    } else {
-      console.warn("Le rendez-vous n'a pas été ajouté.");
-    }
-  } catch (error) {
-    console.error("Erreur lors de l'ajout du rendez-vous :", error);
-    Swal.fire({
-      title: 'Erreur',
-      text: "Erreur lors de l'ajout du rendez-vous : " + error.message,
-      icon: 'error',
-      confirmButtonText: 'OK'
-    });
-  }
-};
-
+          // Afficher l'alerte de succès
+          Swal.fire({
+            title: 'Rendez-vous ajouté !',
+            text: 'Le rendez-vous a été ajouté avec succès.',
+            icon: 'success',
+            confirmButtonText: 'OK'
+          }).then(() => {
+            router.push('/appointments'); // Redirection vers la liste des rendez-vous après confirmation
+          });
+        } else {
+          console.warn("Le rendez-vous n'a pas été ajouté.");
+        }
+      } catch (error) {
+        console.error("Erreur lors de l'ajout du rendez-vous :", error);
+        Swal.fire({
+          title: 'Erreur',
+          text: "Erreur lors de l'ajout du rendez-vous : " + error.message,
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+      }
+    };
 
     const goToList = () => {
       router.push('/appointments');
@@ -192,11 +213,13 @@ export default {
       patients,
       medecins,
       addAppointment,
-      goToList
+      goToList,
+      minDate
     };
   },
 };
 </script>
+
 
 <style scoped>
 .admin-dashboard {
