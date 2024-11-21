@@ -28,7 +28,7 @@
           Veuillez entrer une adresse email valide.
         </div>
       </div>
-      <button class="clr btn text-white mt-3 mb-4 me-3">
+      <button class="btn btn-primary text-white mt-3 mb-4 me-3">
         Confirmer
       </button>
       <RouterLink
@@ -56,17 +56,14 @@ const router = useRouter();
 const updatedName = ref(userStore.user.nom);
 const updatedEmail = ref(userStore.user.email);
 
-// Fonction de validation de l'email
 const validateEmail = (email) => {
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return regex.test(email);
 };
 
-// Validation d'email dynamique
 const isEmailValid = computed(() => validateEmail(updatedEmail.value));
 
 const submitUpdate = async () => {
-  // Vérification côté client avant l'envoi
   if (!isEmailValid.value) {
     Swal.fire({
       icon: "error",
@@ -78,10 +75,8 @@ const submitUpdate = async () => {
   }
 
   try {
-    // Mise à jour des informations utilisateur
     await UtilisateurStore.updateCurrentUser(updatedName.value, updatedEmail.value);
 
-    // Alerte de succès
     Swal.fire({
       icon: "success",
       title: "Succès",
@@ -89,10 +84,8 @@ const submitUpdate = async () => {
       confirmButtonText: "OK",
     });
 
-    // Redirection après confirmation
     router.push("/calendar");
   } catch (error) {
-    // Gérer les erreurs spécifiques
     if (error.response && error.response.status === 409) {
       Swal.fire({
         icon: "warning",

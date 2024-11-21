@@ -15,6 +15,7 @@ import CalendarView from '../components/CalendarView.vue';
 import ForgotPassword from '@/components/ForgotPassword.vue';
 import ResetPassword from '@/components/ResetPassword.vue';
 import EditCurrentUser from '../views/User/EditCurrent!user.vue';
+import ChangePassword from '../views/User/ChangePassword.vue';
 
 
 const routes = [
@@ -38,6 +39,7 @@ const routes = [
       { path: '/patients', name: 'PatientList', component: PatientList, meta: { requiresAuth: true } },
       { path: '/add-appointment', name: 'AddAppointment', component: AddAppointment, meta: { requiresAuth: true } },
       { path: '/edit-user', name: 'edit-user', component: EditCurrentUser, meta: { requiresAuth: true } },
+      { path: '/change-password', name: 'echanger-password', component: ChangePassword, meta: { requiresAuth: true } },
     ]
   }
 ];

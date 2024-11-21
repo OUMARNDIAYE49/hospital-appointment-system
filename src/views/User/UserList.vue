@@ -38,8 +38,6 @@
         </tbody>
       </table>
     </div>
-
-    <!-- Modal pour afficher les détails de l'utilisateur -->
     <div v-if="showDetailsModal" class="modal" tabindex="-1" role="dialog" @click.self="closeDetailsModal">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -60,9 +58,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Modal pour modifier l'utilisateur -->
-    <!-- Modal pour modifier l'utilisateur -->
 <div v-if="showEditModal" class="modal" tabindex="-1" role="dialog" @click.self="closeEditModal">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -87,7 +82,6 @@
               <option value="MEDECIN">MEDECIN</option>
             </select>
           </div>
-          <!-- Condition pour afficher le champ spécialité seulement si ce n'est pas un ADMIN -->
           <div v-if="selectedUser.role !== 'ADMIN'" class="form-group">
             <label>Spécialité</label>
             <select v-model="selectedUser.specialite_id" class="form-control" required>
@@ -159,8 +153,6 @@ export default {
       showEditModal.value = false;
       selectedUser.value = {};
     };
-
-    // Vérification de l'unicité de l'email
     const checkEmailUnique = async (email, userId) => {
       const existingUser = users.value.find(user => user.email === email && user.id !== userId);
       return !existingUser;
@@ -169,8 +161,6 @@ export default {
     const saveEdit = async () => {
       const id = selectedUser.value.id;
       const email = selectedUser.value.email;
-
-      // Vérifier l'unicité de l'email avant d'enregistrer
       const isEmailUnique = await checkEmailUnique(email, id);
       if (!isEmailUnique) {
         Swal.fire({
@@ -186,8 +176,6 @@ export default {
         await userStore.updateUtilisateur(id, selectedUser.value);
         await userStore.loadDataFromApi();
         closeEditModal();
-
-        // Affiche une alerte de succès après la modification
         Swal.fire({
           title: 'Modifié!',
           text: 'Les informations de l\'utilisateur ont été mises à jour avec succès.',
@@ -204,52 +192,54 @@ export default {
         });
       }
     };
-
-   const deleteUser = async (id) => {
+    const deleteUser = async (id) => {
   try {
-    // Vérifier si l'utilisateur a des rendez-vous associés
-    const userHasAppointments = await userStore.checkUserAppointments(id);
-
-    if (userHasAppointments) {
-      Swal.fire(
-        'Impossible de supprimer',
-        'Cet utilisateur est associé à des rendez-vous. Veuillez d\'abord dissocier ou supprimer ces rendez-vous.',
-        'warning'
-      );
+    const hasAppointments = await userStore.checkUserAppointments(id);
+    if (hasAppointments) {
+      await Swal.fire({
+        icon: 'error',
+        title: 'Suppression impossible',
+        text: "Cet utilisateur est associé à des rendez-vous. Veuillez dissocier ou supprimer ces rendez-vous avant de continuer.",
+      });
       return;
     }
-
-    // Confirmation avant suppression
-    const result = await Swal.fire({
+    const { isConfirmed } = await Swal.fire({
       title: 'Êtes-vous sûr de vouloir supprimer cet utilisateur ?',
       text: "Cette action est irréversible.",
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Oui, supprimer',
       cancelButtonText: 'Annuler',
-      reverseButtons: true
+      reverseButtons: true,
     });
 
-    // Si l'utilisateur confirme, procéder à la suppression
-    if (result.isConfirmed) {
-      await userStore.deleteUtilisateur(id);
-      await userStore.loadDataFromApi(); // Recharger les données après la suppression
-      Swal.fire(
-        'Supprimé!',
-        'L\'utilisateur a été supprimé avec succès.',
-        'success'
-      );
+    if (isConfirmed) {
+      const deleteResult = await userStore.deleteUtilisateur(id);
+      if (deleteResult) {
+        await userStore.loadDataFromApi();
+        if (users && users.value) {
+          users.value = users.value.filter(user => user.id !== id);
+        }
+
+        await Swal.fire('Supprimé!', 'L\'utilisateur a été supprimé avec succès.', 'success');
+      } else {
+        await Swal.fire({
+          icon: 'error',
+          title: 'Erreur',
+          text: "Imposible de supprimer, utilisateur est associé à des rendez-vous.",
+        });
+      }
     }
   } catch (error) {
-    console.error("Erreur lors de la suppression de l'utilisateur : ", error);
-    Swal.fire({
-      title: 'Erreur',
-      text: "Une erreur s'est produite lors de la suppression de l'utilisateur. Veuillez réessayer.",
+    console.error("Erreur lors de la suppression : ", error);
+    await Swal.fire({
       icon: 'error',
-      confirmButtonText: 'OK'
+      title: 'Erreur',
+      text: "Une erreur est survenue lors de la suppression de l'utilisateur. Veuillez vérifier votre connexion ou réessayer.",
     });
   }
 };
+
 
 
     return {
@@ -281,7 +271,7 @@ export default {
 }
 
 .table-responsive {
-  width: 100%; /* Prendre toute la largeur disponible */
+  width: 100%; 
   margin-top: 20px;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
@@ -289,37 +279,22 @@ export default {
 }
 
 h1 {
-  margin: 60px 0 20px 0; /* Augmenter la marge supérieure pour descendre le titre */
+  margin: 60px 0 20px 0;
   color: #343a40;
   font-weight: bold;
 }
 
-/* .search-bar {
-  display: flex;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.search-bar label {
-  margin-right: 10px;
-  font-weight: bold;
-}
-
-.search-bar input {
-  width: auto;
-} */
-
 .table {
-  width: 100%; /* Assurez-vous que la table occupe toute la largeur du conteneur */
-  table-layout: fixed; /* Fixer le layout de la table pour un meilleur contrôle */
+  width: 100%; 
+  table-layout: fixed; 
 }
 
 .table th, .table td {
-  word-wrap: break-word; /* Permettre le retour à la ligne dans les cellules */
+  word-wrap: break-word; 
 }
 
 .table-hover tbody tr:hover {
-  background-color: #f1f1f1; /* Couleur d'arrière-plan au survol */
+  background-color: #f1f1f1; 
 }
 
 .modal {

@@ -22,12 +22,11 @@ export const useUtilisateurStore = defineStore("utilisateurs", {
           }
         );
         this.utilisateurs = response.data;
-        await this.fetchSpecialites(); // Charger les spécialités après avoir récupéré les utilisateurs
+        await this.fetchSpecialites();
       } catch (error) {
         console.error("Erreur lors du chargement des utilisateurs :", error);
       }
     },
-
 
     async updateCurrentUser(nom, email) {
       const auth = useAuthStore();
@@ -41,11 +40,36 @@ export const useUtilisateurStore = defineStore("utilisateurs", {
         return response.data.utilisateurs;
       } catch (error) {
         console.error("Erreur lors de la mise à jour des informations :", error);
-        // toast.error("Erreur lors de la mise à jour des informations");
         throw error;
       }
     },
 
+    async changePassword(currentPassword, newPassword) {
+      const auth = useAuthStore();
+      try {
+          console.log("Données envoyées :", { currentPassword, newPassword });
+          const response = await axios.put(
+              "http://localhost:3000/api/user/change-password",
+              { currentPassword, newPassword },
+              {
+                  headers: {
+                      Authorization: `Bearer ${auth.token}`,
+                  },
+              }
+          );
+          console.log("Réponse de l'API :", response.data);
+          return response.data;
+      } catch (error) {
+          console.error("Erreur lors du changement de mot de passe :", error);
+          if (error.response) {
+              console.error("Réponse du serveur :", error.response.data);
+              console.error("Statut HTTP :", error.response.status);
+          }
+          throw error;
+      }
+  },
+  
+    
 
     async fetchSpecialites() {
       const auth = useAuthStore();
@@ -112,29 +136,28 @@ export const useUtilisateurStore = defineStore("utilisateurs", {
           headers: { Authorization: `Bearer ${auth.token}` },
         });
         this.utilisateurs = this.utilisateurs.filter((utilisateur) => utilisateur.id !== id);
-        return true; // Indicateur de succès
+        return true; 
       } catch (error) {
         console.error("Erreur lors de la suppression de l'utilisateur :", error);
-        return false; // Retourne false en cas d'erreur
+        return false; 
       }
     },
     
-
     async checkUserAppointments(id) {
-      const authStore = useAuthStore(); // Utiliser useAuthStore pour accéder au store d'authentification
+      const auth = useAuthStore(); 
       try {
         const response = await axios.get(
           `http://localhost:3000/api/utilisateurs/${id}/appointments`,
           {
             headers: {
-              Authorization: `Bearer ${authStore.token}`, // Utiliser le token provenant du store auth
+              Authorization: `Bearer ${auth.token}`, 
             },
           }
         );
-        return response.data.length > 0; // Retourne true si des rendez-vous sont trouvés
+        return response.data.length > 0; 
       } catch (error) {
         console.error("Erreur lors de la vérification des rendez-vous :", error);
-        return false; // Retourne false en cas d'erreur
+        return false; 
       }
     },
   },
