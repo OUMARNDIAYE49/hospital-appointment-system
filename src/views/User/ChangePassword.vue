@@ -112,7 +112,7 @@
         <button type="submit" class="btn btn-primary" :disabled="!isPasswordValid">
           Valider
         </button>
-        <router-link to="/" class="btn btn-secondary">
+        <router-link to="/Calendar" class="btn btn-secondary">
           Annuler
         </router-link>
       </div>
@@ -123,11 +123,11 @@
 <script setup>
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
-import { useUtilisateurStore } from "@/store/userStore"; // Import du store
+import { useUtilisateurStore } from "@/store/userStore"; 
 import Swal from "sweetalert2";
 
 const router = useRouter();
-const utilisateurStore = useUtilisateurStore(); // Initialisation du store utilisateur
+const utilisateurStore = useUtilisateurStore(); 
 
 const currentPassword = ref("");
 const newPassword = ref("");
@@ -156,7 +156,6 @@ const submitPasswordChange = async () => {
   }
 
   try {
-    // Appel de la méthode changePassword dans le store avec l'ancien et le nouveau mot de passe
     await utilisateurStore.changePassword(currentPassword.value, newPassword.value);
 
     Swal.fire({

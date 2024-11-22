@@ -1,31 +1,32 @@
 <template>
-  <h1 class="text-center mb-4">Connexion</h1>
-  <form @submit.prevent="login" class="shadow-lg p-4 rounded bg-white">
-    <div class="form-group mb-3">
-      <label for="email" class="form-label">Email</label>
-      <input
-        type="email"
-        id="email"
-        v-model="credentials.email"
-        class="form-control"
-        placeholder="Entrez votre email"
-        required
-      />
-    </div>
-
-    <div class="form-group mb-3 position-relative password-field">
-      <label for="password" class="form-label">Mot de passe</label>
-      <div class="input-wrapper">
+  <div class="container-center">
+    <form @submit.prevent="login" class="shadow-lg p-4 rounded bg-white">
+      <h1 class="text-center mb-4">Connexion</h1>
+      <div class="form-group mb-3">
+        <label for="email" class="form-label">Email</label>
         <input
-          :type="showPassword ? 'text' : 'password'"
-          id="password"
-          v-model="credentials.password"
+          type="email"
+          id="email"
+          v-model="credentials.email"
           class="form-control"
-          placeholder="Entrez votre mot de passe"
+          placeholder="Entrez votre email"
           required
         />
-        <span class="toggle-password" @click="togglePasswordVisibility">
-          <svg
+      </div>
+      <div class="form-group mb-3 position-relative password-field">
+        <label for="password" class="form-label">Mot de passe</label>
+        <div class="input-wrapper">
+          <input
+            :type="showPassword ? 'text' : 'password'"
+            id="password"
+            v-model="credentials.password"
+            class="form-control"
+            placeholder="Entrez votre mot de passe"
+            required
+          />
+          <span class="toggle-password" @click="togglePasswordVisibility">
+            <!-- SVG Icons -->
+            <svg
             v-if="showPassword"
             xmlns="http://www.w3.org/2000/svg"
             width="20"
@@ -60,20 +61,22 @@
             ></path>
             <circle cx="12" cy="12" r="3"></circle>
           </svg>
-        </span>
+          </span>
+        </div>
       </div>
-    </div>
-
-    <div class="text-end mb-4">
-      <a href="/forgot-password" class="forgot-password-link">Mot de passe oublié ?</a>
-    </div>
-
-    <div class="d-flex justify-content-between">
-      <button type="submit" class="btn btn-primary">Se connecter</button>
-      <button type="button" class="btn btn-outline-secondary" @click="resetForm">Annuler</button>
-    </div>
-  </form>
+      <div class="text-end mb-4">
+        <a href="/forgot-password" class="forgot-password-link">Mot de passe oublié ?</a>
+      </div>
+      <div class="d-flex justify-content-between">
+        <button type="submit" class="btn btn-primary">Se connecter</button>
+        <button type="button" class="btn btn-outline-secondary" @click="resetForm">
+          Annuler
+        </button>
+      </div>
+    </form>
+  </div>
 </template>
+
 
 <script>
 import { ref } from "vue";
@@ -144,22 +147,53 @@ export default {
 </script>
 
 <style scoped>
-h1 {
-  color: #004085;
-  font-weight: bold;
-  margin-top: 25px;
-  text-align: center;
+.container-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; 
+  width: 100vw; 
+  background-color: #3b5998; 
+  margin: 0;
+  padding: 0;
+  position: absolute; 
+  top: 0;
+  left: 0;
 }
 
 form {
-  max-width: 400px;
-  width: 100%;
-  margin: 0 auto;
+  max-width: 400px;  
+  width: 100%;  
   border-radius: 8px;
+  background-color: #ffffff; 
+  padding: 20px;
+  box-sizing: border-box;
 }
 
-.shadow-lg {
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+h1 {
+  color: #004085;
+  font-weight: bold;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.btn {
+  width: 48%;
+}
+
+.btn-primary {
+  background-color: #0069d9;
+  border: none;
+}
+
+.btn-outline-secondary {
+  color: #6c757d;
+  border: 1px solid #6c757d;
+}
+
+.btn-primary:hover,
+.btn-outline-secondary:hover {
+  opacity: 0.9;
 }
 
 .input-wrapper {
@@ -182,35 +216,6 @@ form {
   height: 100%;
 }
 
-.btn {
-  width: 48%;
-}
-
-.btn-primary {
-  background-color: #0069d9;
-  border: none;
-}
-
-.btn-outline-secondary {
-  color: #6c757d;
-  border: 1px solid #6c757d;
-}
-
-.btn-primary:hover,
-.btn-outline-secondary:hover {
-  opacity: 0.9;
-}
-
-.bg-white {
-  background-color: #ffffff;
-}
-
-.form-control {
-  height: 45px;
-  font-size: 16px;
-  border-radius: 4px;
-}
-
 .forgot-password-link {
   color: #0069d9;
   text-decoration: none;
@@ -219,4 +224,6 @@ form {
 .forgot-password-link:hover {
   text-decoration: underline;
 }
+
 </style>
+
