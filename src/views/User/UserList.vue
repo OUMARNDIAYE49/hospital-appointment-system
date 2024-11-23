@@ -38,6 +38,8 @@
         </tbody>
       </table>
     </div>
+
+    <!-- Modal Détails Utilisateur -->
     <div v-if="showDetailsModal" class="modal" tabindex="-1" role="dialog" @click.self="closeDetailsModal">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -58,50 +60,56 @@
         </div>
       </div>
     </div>
-<div v-if="showEditModal" class="modal" tabindex="-1" role="dialog" @click.self="closeEditModal">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Modifier l'Utilisateur</h5>
-        <button type="button" class="close" @click="closeEditModal">&times;</button>
-      </div>
-      <div class="modal-body">
-        <form @submit.prevent="saveEdit">
-          <div class="form-group">
-            <label>Nom</label>
-            <input v-model="selectedUser.nom" class="form-control" required />
+
+    <!-- Modal Modifier Utilisateur -->
+    <div v-if="showEditModal" class="modal" tabindex="-1" role="dialog" @click.self="closeEditModal">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Modifier l'Utilisateur</h5>
+            <button type="button" class="close" @click="closeEditModal">&times;</button>
           </div>
-          <div class="form-group">
-            <label>Email</label>
-            <input v-model="selectedUser.email" class="form-control" required />
+          <div class="modal-body">
+            <form @submit.prevent="saveEdit">
+              <div class="form-group">
+                <label>Nom</label>
+                <input v-model="selectedUser.nom" class="form-control" @blur="validateNom" required />
+                <div v-if="nomError" class="text-danger">{{ nomError }}</div>
+              </div>
+              <div class="form-group">
+                <label>Email</label>
+                <input v-model="selectedUser.email" class="form-control" @blur="validateEmail" required />
+                <div v-if="emailError" class="text-danger">{{ emailError }}</div>
+              </div>
+              <div class="form-group">
+                <label>Rôle</label>
+                <select v-model="selectedUser.role" class="form-control" required>
+                  <option value="ADMIN">ADMIN</option>
+                  <option value="MEDECIN">MEDECIN</option>
+                </select>
+              </div>
+              <div v-if="selectedUser.role !== 'ADMIN'" class="form-group">
+                <label>Spécialité</label>
+                <select v-model="selectedUser.specialite_id" class="form-control" required>
+                  <option v-for="specialite in specialites" :key="specialite.id" :value="specialite.id">
+                    {{ specialite.nom }}
+                  </option>
+                </select>
+              </div>
+              <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" :disabled="nomError || emailError || !selectedUser.nom || !selectedUser.email || !selectedUser.role || (selectedUser.role !== 'ADMIN' && !selectedUser.specialite_id)">
+                  Enregistrer
+                </button>
+                <button type="button" class="btn btn-secondary" @click="closeEditModal">Annuler</button>
+              </div>
+            </form>
           </div>
-          <div class="form-group">
-            <label>Rôle</label>
-            <select v-model="selectedUser.role" class="form-control" required>
-              <option value="ADMIN">ADMIN</option>
-              <option value="MEDECIN">MEDECIN</option>
-            </select>
-          </div>
-          <div v-if="selectedUser.role !== 'ADMIN'" class="form-group">
-            <label>Spécialité</label>
-            <select v-model="selectedUser.specialite_id" class="form-control" required>
-              <option v-for="specialite in specialites" :key="specialite.id" :value="specialite.id">
-                {{ specialite.nom }}
-              </option>
-            </select>
-          </div>
-          <div class="modal-footer">
-            <button type="submit" class="btn btn-primary">Enregistrer</button>
-            <button type="button" class="btn btn-secondary" @click="closeEditModal">Annuler</button>
-          </div>
-        </form>
+        </div>
       </div>
     </div>
   </div>
-</div>
-
-  </div>
 </template>
+
 
 <script>
 import { ref, onMounted, computed } from 'vue';
@@ -118,6 +126,10 @@ export default {
     const showEditModal = ref(false);
     const selectedUser = ref({});
     const specialites = computed(() => userStore.specialites);
+
+    // Erreurs de validation
+    const nomError = ref('');
+    const emailError = ref('');
 
     onMounted(() => {
       userStore.loadDataFromApi();
@@ -153,9 +165,31 @@ export default {
       showEditModal.value = false;
       selectedUser.value = {};
     };
+
     const checkEmailUnique = async (email, userId) => {
       const existingUser = users.value.find(user => user.email === email && user.id !== userId);
       return !existingUser;
+    };
+
+    const validateNom = () => {
+  const isAlpha = /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/.test(selectedUser.value.nom);
+  const isLongEnough = selectedUser.value.nom.length > 3;
+
+  // Vérifie que le nom est valide et que sa longueur est supérieure à 3 caractères
+  if (!isAlpha) {
+    nomError.value = 'Le nom doit contenir uniquement des lettres.';
+  } else if (!isLongEnough) {
+    nomError.value = 'Le nom doit comporter plus de 3 caractères.';
+  } else {
+    nomError.value = '';  // Si tout est valide, on vide l'erreur
+  }
+};
+
+    const validateEmail = () => {
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+      emailError.value = emailRegex.test(selectedUser.value.email)
+        ? ''
+        : "L'email doit être valide et se terminer par '@gmail.com'.";
     };
 
     const saveEdit = async () => {
@@ -192,55 +226,55 @@ export default {
         });
       }
     };
+
+
     const deleteUser = async (id) => {
-  try {
-    const hasAppointments = await userStore.checkUserAppointments(id);
-    if (hasAppointments) {
-      await Swal.fire({
-        icon: 'error',
-        title: 'Suppression impossible',
-        text: "Cet utilisateur est associé à des rendez-vous. Veuillez dissocier ou supprimer ces rendez-vous avant de continuer.",
-      });
-      return;
-    }
-    const { isConfirmed } = await Swal.fire({
-      title: 'Êtes-vous sûr de vouloir supprimer cet utilisateur ?',
-      text: "Cette action est irréversible.",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Oui, supprimer',
-      cancelButtonText: 'Annuler',
-      reverseButtons: true,
-    });
-
-    if (isConfirmed) {
-      const deleteResult = await userStore.deleteUtilisateur(id);
-      if (deleteResult) {
-        await userStore.loadDataFromApi();
-        if (users && users.value) {
-          users.value = users.value.filter(user => user.id !== id);
+      try {
+        const hasAppointments = await userStore.checkUserAppointments(id);
+        if (hasAppointments) {
+          await Swal.fire({
+            icon: 'error',
+            title: 'Suppression impossible',
+            text: "Cet utilisateur est associé à des rendez-vous. Veuillez dissocier ou supprimer ces rendez-vous avant de continuer.",
+          });
+          return;
         }
+        const { isConfirmed } = await Swal.fire({
+          title: 'Êtes-vous sûr de vouloir supprimer cet utilisateur ?',
+          text: "Cette action est irréversible.",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Oui, supprimer',
+          cancelButtonText: 'Annuler',
+          reverseButtons: true,
+        });
 
-        await Swal.fire('Supprimé!', 'L\'utilisateur a été supprimé avec succès.', 'success');
-      } else {
+        if (isConfirmed) {
+          const deleteResult = await userStore.deleteUtilisateur(id);
+          if (deleteResult) {
+            await userStore.loadDataFromApi();
+            if (users && users.value) {
+              users.value = users.value.filter(user => user.id !== id);
+            }
+
+            await Swal.fire('Supprimé!', 'L\'utilisateur a été supprimé avec succès.', 'success');
+          } else {
+            await Swal.fire({
+              icon: 'error',
+              title: 'Erreur',
+              text: "Imposible de supprimer, utilisateur est associé à des rendez-vous.",
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Erreur lors de la suppression : ", error);
         await Swal.fire({
           icon: 'error',
           title: 'Erreur',
-          text: "Imposible de supprimer, utilisateur est associé à des rendez-vous.",
+          text: "Une erreur est survenue lors de la suppression de l'utilisateur. Veuillez vérifier votre connexion ou réessayer.",
         });
       }
-    }
-  } catch (error) {
-    console.error("Erreur lors de la suppression : ", error);
-    await Swal.fire({
-      icon: 'error',
-      title: 'Erreur',
-      text: "Une erreur est survenue lors de la suppression de l'utilisateur. Veuillez vérifier votre connexion ou réessayer.",
-    });
-  }
-};
-
-
+    };
 
     return {
       users,
@@ -255,12 +289,15 @@ export default {
       closeDetailsModal,
       closeEditModal,
       saveEdit,
-      deleteUser
+      deleteUser,
+      nomError,
+      emailError,
+      validateNom,
+      validateEmail
     };
   }
 };
 </script>
-
 
 <style scoped>
 .admin-dashboard {

@@ -45,6 +45,7 @@
               <div class="form-group">
                 <label>Nom de la Spécialité</label>
                 <input v-model="selectedSpecialty.nom" class="form-control" required />
+                <div v-if="nomError" class="text-danger">{{ nomError }}</div>
               </div>
               <div class="modal-footer">
                 <button type="submit" class="btn btn-primary">Enregistrer</button>
@@ -79,12 +80,26 @@ export default {
     const showModal = ref(false);
     const editMode = ref(false);
     const selectedSpecialty = ref({});
+    const nomError = ref('');
 
     onMounted(async () => {
       await specialiteStore.loadDataFromApi();
     });
 
     const specialties = computed(() => specialiteStore.specialites);
+
+    const validateNom = () => {
+      const isAlpha = /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/.test(selectedSpecialty.value.nom);
+      const isShortEnough = selectedSpecialty.value.nom.length >= 3;
+      
+      if (!isAlpha) {
+        nomError.value = 'Le nom doit contenir uniquement des lettres.';
+      } else if (!isShortEnough) {
+        nomError.value = 'Le nom ne doit pas etre inferieur 3 caractères.';
+      } else {
+        nomError.value = '';
+      }
+    };
 
     const viewSpecialty = (specialty) => {
       selectedSpecialty.value = { ...specialty };
@@ -104,6 +119,12 @@ export default {
     };
 
     const saveEdit = async () => {
+      // Validation du nom de la spécialité
+      validateNom();
+      if (nomError.value) {
+        return;
+      }
+
       // Vérifie si le nom existe déjà dans une autre spécialité
       if (specialties.value.some(specialty => specialty.nom === selectedSpecialty.value.nom && specialty.id !== selectedSpecialty.value.id)) {
         await Swal.fire({
@@ -169,7 +190,7 @@ export default {
         console.error("Erreur lors de la suppression :", error);
         Swal.fire(
           'Erreur',
-          'Suppression impossible, Cette specialité est associé a des utilisateurs.',
+          'Suppression impossible, Cette specialité est associée à des utilisateurs.',
           'error'
         );
       }
@@ -180,6 +201,7 @@ export default {
       showModal,
       editMode,
       selectedSpecialty,
+      nomError,
       viewSpecialty,
       editSpecialty,
       closeModal,
@@ -190,6 +212,9 @@ export default {
   },
 };
 </script>
+
+
+
 
 <style scoped>
 .admin-dashboard {

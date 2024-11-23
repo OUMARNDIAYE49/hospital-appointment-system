@@ -16,6 +16,7 @@
             v-model="currentPassword"
             id="oldPassword"
             required
+            autocomplete="new-password"
           />
           <span class="input-group-text" @click="toggleOldPasswordVisibility" style="cursor: pointer;">
             <svg
@@ -64,6 +65,7 @@
             id="newPassword"
             :class="{ 'is-invalid': !isPasswordValid && newPassword }"
             required
+            
           />
           <span class="input-group-text" @click="toggleNewPasswordVisibility" style="cursor: pointer;">
             <svg

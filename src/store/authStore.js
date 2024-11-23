@@ -3,12 +3,11 @@ import axios from "axios";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
-    user: null, // Informations de l'utilisateur connecté
-    token: null, // Jeton d'authentification
+    user: null, 
+    token: null, 
   }),
 
   actions: {
-    // Charger les données d'authentification depuis le localStorage
     loadAuthFromLocalStorage() {
       const storedToken = localStorage.getItem("authToken");
       const storedUser = localStorage.getItem("authUser");
@@ -20,7 +19,6 @@ export const useAuthStore = defineStore("auth", {
         console.log("Utilisateur chargé depuis localStorage :", this.user);
         console.log("Token chargé depuis localStorage :", this.token);
 
-        // Affichage du rôle de l'utilisateur connecté
         if (this.user && this.user.role) {
           console.log("Rôle de l'utilisateur connecté :", this.user.role);
         } else {
@@ -30,8 +28,6 @@ export const useAuthStore = defineStore("auth", {
         console.log("Aucun utilisateur ou token trouvé dans localStorage.");
       }
     },
-
-    // Connexion de l'utilisateur
     async login(credentials) {
       try {
         console.log("Tentative de connexion avec :", credentials);
@@ -42,17 +38,14 @@ export const useAuthStore = defineStore("auth", {
         );
         console.log("Réponse du serveur :", response.data);
 
-        // Stocker le token et l'utilisateur dans le store
         this.token = response.data.token;
         this.user = response.data.utilisateur;
 
-        // Sauvegarder dans le localStorage pour la persistance
         localStorage.setItem("authToken", this.token);
         localStorage.setItem("authUser", JSON.stringify(this.user));
 
         console.log("Utilisateur connecté après login :", this.user);
 
-        // Affichage du rôle de l'utilisateur connecté
         if (this.user && this.user.role) {
           console.log("Rôle de l'utilisateur connecté :", this.user.role);
         }
@@ -62,29 +55,24 @@ export const useAuthStore = defineStore("auth", {
       }
     },
 
-    // Déconnexion de l'utilisateur
     logout() {
       this.token = null;
       this.user = null;
 
-      // Supprimer du localStorage
       localStorage.removeItem("authToken");
       localStorage.removeItem("authUser");
 
       console.log("Déconnexion réussie");
     },
 
-    // Vérifier si l'utilisateur est authentifié
     isAuthenticated() {
       return !!this.token;
     },
 
-    // Récupérer les informations de l'utilisateur connecté
     getUser() {
       return this.user;
     },
 
-    // Envoi de l'email de réinitialisation du mot de passe
     async sendPasswordResetEmail(email) {
       try {
         await axios.post("http://localhost:3000/api/password/forgot-password", {
@@ -100,12 +88,10 @@ export const useAuthStore = defineStore("auth", {
       }
     },
 
-    // Réinitialisation du mot de passe
-    async resetPassword(token, newPassword) {
+    async resetPassword(token, password) {
       try {
-        await axios.post("http://localhost:3000/api/password/reset-password", {
-          token,
-          newPassword,
+        await axios.post(`http://localhost:3000/api/password/reset-password/${token}`, {
+          password,
         });
         console.log("Mot de passe réinitialisé avec succès.");
       } catch (error) {
@@ -118,7 +104,6 @@ export const useAuthStore = defineStore("auth", {
     },
   },
 
-  // Persistance des données avec le plugin Pinia Persisted State
   persist: {
     enabled: true,
     strategies: [

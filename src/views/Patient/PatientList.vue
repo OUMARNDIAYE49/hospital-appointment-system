@@ -161,28 +161,36 @@ export default {
     };
 
     const validateForm = () => {
-      let isValid = true;
-      errors.value = { nom: '', telephone: '', email: '' };
+  let isValid = true;
+  errors.value = { nom: '', telephone: '', email: '' };
 
-      if (selectedPatient.value.nom.length < 3) {
-        errors.value.nom = "Le nom doit contenir au moins 3 caractères.";
-        isValid = false;
-      }
+  // Vérification : le nom doit contenir au moins 3 caractères et uniquement des lettres
+  const nameRegex = /^[a-zA-ZÀ-ÿ\s]+$/;
+  if (!nameRegex.test(selectedPatient.value.nom)) {
+    errors.value.nom = "Le nom ne doit contenir que des lettres et des espaces.";
+    isValid = false;
+  } else if (selectedPatient.value.nom.length < 3) {
+    errors.value.nom = "Le nom doit contenir au moins 3 caractères.";
+    isValid = false;
+  }
 
-      const phoneRegex = /^[0-9+]+$/;
-      if (!phoneRegex.test(selectedPatient.value.telephone) || selectedPatient.value.telephone.length < 8) {
-        errors.value.telephone = "Le téléphone doit être un nombre et contenir au moins 8 chiffres.";
-        isValid = false;
-      }
+  // Vérification : le téléphone doit être un nombre valide avec au moins 8 chiffres
+  const phoneRegex = /^[0-9+]+$/;
+  if (!phoneRegex.test(selectedPatient.value.telephone) || selectedPatient.value.telephone.length < 8) {
+    errors.value.telephone = "Le téléphone doit être un nombre et contenir au moins 8 chiffres.";
+    isValid = false;
+  }
 
-      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      if (!emailRegex.test(selectedPatient.value.email)) {
-        errors.value.email = "L'email doit être valide (ex: aa@gmail.com).";
-        isValid = false;
-      }
+  // Vérification : l'email doit être valide
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+  if (!emailRegex.test(selectedPatient.value.email)) {
+    errors.value.email = "L'email doit être valide et se terminer par '@gmail.com'.";
+    isValid = false;
+  }
 
-      return isValid;
-    };
+  return isValid;
+};
+
 
     const checkUniqueFields = async () => {
       const existingPhone = patients.value.find(patient => patient.telephone === selectedPatient.value.telephone && patient.id !== selectedPatient.value.id);

@@ -18,6 +18,9 @@
           placeholder="Entrez le nom de la spécialité"
           required
         />
+        <div v-if="nomError" class="text-danger mt-2">
+          {{ nomError }}
+        </div>
       </div>
 
       <button type="submit" class="btn btn-primary w-100">Ajouter Spécialité</button>
@@ -41,7 +44,39 @@ export default {
       nom: '',
     });
 
+    const nomError = ref('');
+
+    const validateNom = () => {
+  // Vérification que le nom ne contient que des lettres et des espaces, apostrophes et traits d'union
+  const isAlpha = /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/.test(specialty.value.nom);
+  
+  // Vérification que le nom n'est pas plus long que 3 caractères
+  const isShortEnough = specialty.value.nom.length <= 3;
+
+  // Si le nom n'est pas valide, afficher une erreur appropriée
+  if (!isAlpha) {
+    nomError.value = 'Le nom doit contenir uniquement des lettres.';
+  } else if (!isShortEnough) {
+    nomError.value = 'Le nom ne doit pas contenir plus de 3 caractères.';
+  } else {
+    nomError.value = ''; // Aucune erreur si tout est correct
+  }
+};
+
+    // Fonction d'ajout de la spécialité
     const addSpecialty = async () => {
+      // Validation du nom
+      validateNom();
+
+      if (nomError.value) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Nom invalide',
+          text: nomError.value,
+        });
+        return;
+      }
+
       if (!specialty.value.nom.trim()) {
         Swal.fire({
           icon: 'warning',
@@ -50,7 +85,7 @@ export default {
         });
         return;
       }
-      
+
       // Vérifier l'unicité avant d'ajouter
       if (!specialiteStore.isUniqueSpeciality(specialty.value.nom)) {
         Swal.fire({
@@ -85,6 +120,7 @@ export default {
 
     return {
       specialty,
+      nomError,
       addSpecialty,
       goToList,
     };
@@ -142,5 +178,10 @@ h1 {
   padding: 4px 12px;
   font-size: 0.85rem;
   border-radius: 6px;
+}
+
+.text-danger {
+  font-size: 0.875rem;
+  font-weight: 400;
 }
 </style>

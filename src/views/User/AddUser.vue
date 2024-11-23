@@ -10,12 +10,28 @@
     <form @submit.prevent="addUser" class="user-form">
       <div class="form-group">
         <label for="nom">Nom:</label>
-        <input type="text" v-model="nom" id="nom" required class="form-control" />
+        <input
+          type="text"
+          v-model="nom"
+          id="nom"
+          required
+          class="form-control"
+          @input="validateNom"
+        />
+        <small v-if="nomError" class="text-danger">{{ nomError }}</small>
       </div>
 
       <div class="form-group">
         <label for="email">Email:</label>
-        <input type="email" v-model="email" id="email" required class="form-control" />
+        <input
+          type="email"
+          v-model="email"
+          id="email"
+          required
+          class="form-control"
+          @input="validateEmail"
+        />
+        <small v-if="emailError" class="text-danger">{{ emailError }}</small>
       </div>
 
       <div class="form-group">
@@ -84,6 +100,8 @@ export default {
     const role = ref('');
     const specialite_id = ref('');
     const specialites = ref([]);
+    const nomError = ref('');
+    const emailError = ref('');
     const passwordError = ref('');
     const showPassword = ref(false);
 
@@ -91,70 +109,91 @@ export default {
       showPassword.value = !showPassword.value;
     };
 
-    const validatePassword = () => {
-      const hasLetters = /[A-Za-z]/.test(password.value);
-      const hasNumbers = /\d/.test(password.value);
-      if (!hasLetters || !hasNumbers) {
-        passwordError.value = "Le mot de passe doit contenir des lettres et des chiffres.";
-      } else {
-        passwordError.value = "";
-      }
-    };
+    const validateNom = () => {
+  // Vérification que le nom ne contient que des lettres et des espaces, apostrophes et traits d'union
+  const isAlpha = /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/.test(nom.value);
+  
+  // Vérification que le nom a une longueur supérieure à 3 caractères
+  const isLongEnough = nom.value.length > 3;
 
-    const addUser = async () => {
-  validatePassword();
-  if (passwordError.value) return;
-
-  // Vérifier l'unicité de l'email
-  const emailExists = utilisateurStore.utilisateurs.some(
-    (user) => user.email === email.value
-  );
-
-  if (emailExists) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Email déjà utilisé',
-      text: 'Cet email est déjà associé à un autre utilisateur.',
-      confirmButtonText: 'OK',
-    });
-    return; // Empêche l'ajout si l'email existe déjà
-  }
-
-  const utilisateur = {
-    nom: nom.value,
-    email: email.value,
-    password: password.value,
-    role: role.value,
-    specialite_id: role.value === 'ADMIN' ? null : specialite_id.value,
-  };
-
-  try {
-    await utilisateurStore.addUtilisateur(utilisateur);
-    Swal.fire({
-      icon: 'success',
-      title: 'Utilisateur ajouté',
-      text: 'L’utilisateur a été ajouté avec succès!',
-      confirmButtonText: 'OK',
-      timer: 2000,
-    });
-    router.push('/users');
-  } catch (error) {
-    console.error("Erreur lors de l'ajout de l'utilisateur :", error);
-    Swal.fire({
-      icon: 'error',
-      title: 'Erreur',
-      text: "Une erreur est survenue lors de l'ajout de l'utilisateur.",
-      confirmButtonText: 'OK',
-    });
+  // Si le nom n'est pas valide, afficher une erreur appropriée
+  if (!isAlpha) {
+    nomError.value = 'Le nom doit contenir uniquement des lettres.';
+  } else if (!isLongEnough) {
+    nomError.value = 'Le nom doit contenir plus de 3 caractères.';
+  } else {
+    nomError.value = ''; // Aucune erreur si tout est correct
   }
 };
 
-    const handleRoleChange = () => {
-      if (role.value === 'ADMIN') {
-        specialite_id.value = null;
-      } else {
-        specialite_id.value = '';
+
+    const validateEmail = () => {
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+      emailError.value = emailRegex.test(email.value)
+        ? ''
+        : "L'email doit être valide et se terminer par '@gmail.com'.";
+    };
+
+    const validatePassword = () => {
+      const hasLetters = /[A-Za-z]/.test(password.value);
+      const hasNumbers = /\d/.test(password.value);
+      passwordError.value = hasLetters && hasNumbers
+        ? ''
+        : 'Le mot de passe doit contenir des lettres et des chiffres.';
+    };
+
+    const addUser = async () => {
+      validateNom();
+      validateEmail();
+      validatePassword();
+
+      if (nomError.value || emailError.value || passwordError.value) return;
+
+      const emailExists = utilisateurStore.utilisateurs.some(
+        (user) => user.email === email.value
+      );
+
+      if (emailExists) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Email déjà utilisé',
+          text: 'Cet email est déjà associé à un autre utilisateur.',
+          confirmButtonText: 'OK',
+        });
+        return;
       }
+
+      const utilisateur = {
+        nom: nom.value,
+        email: email.value,
+        password: password.value,
+        role: role.value,
+        specialite_id: role.value === 'ADMIN' ? null : specialite_id.value,
+      };
+
+      try {
+        await utilisateurStore.addUtilisateur(utilisateur);
+        Swal.fire({
+          icon: 'success',
+          title: 'Utilisateur ajouté',
+          text: 'L’utilisateur a été ajouté avec succès!',
+          confirmButtonText: 'OK',
+          timer: 2000,
+        });
+        router.push('/users');
+      } catch (error) {
+        console.error("Erreur lors de l'ajout de l'utilisateur :", error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur',
+          text: "Une erreur est survenue lors de l'ajout de l'utilisateur.",
+          confirmButtonText: 'OK',
+        });
+      }
+    };
+
+    const handleRoleChange = () => {
+      specialite_id.value = role.value === 'ADMIN' ? null : '';
     };
 
     const navigateToUserList = () => {
@@ -181,11 +220,15 @@ export default {
       role,
       specialite_id,
       specialites,
+      nomError,
+      emailError,
+      passwordError,
       addUser,
       navigateToUserList,
       handleRoleChange,
+      validateNom,
+      validateEmail,
       validatePassword,
-      passwordError,
       showPassword,
       togglePasswordVisibility,
     };
@@ -244,21 +287,5 @@ h1 {
   right: 10px;
   transform: translateY(-50%);
   cursor: pointer;
-}
-
-.btn-primary {
-  border-radius: 6px;
-  font-weight: 500;
-}
-
-.btn-outline-secondary {
-  padding: 4px 12px;
-  font-size: 0.85rem;
-  border-radius: 6px;
-}
-
-.text-danger {
-  color: #dc3545;
-  font-size: 0.875rem;
 }
 </style>

@@ -100,9 +100,15 @@ export default {
       errors.value = {};
       let isValid = true;
 
-      // Validation du nom
-      if (!patient.value.nom || patient.value.nom.length < 3) {
-        errors.value.nom = 'Le nom doit contenir au moins 3 caractères.';
+      // Validation du nom (lettres uniquement et au moins 3 caractères)
+      const nameRegex = /^[a-zA-ZÀ-ÿ\s]+$/;
+      if (
+        !patient.value.nom ||
+        !nameRegex.test(patient.value.nom) ||
+        patient.value.nom.length < 3
+      ) {
+        errors.value.nom =
+          'Le nom doit contenir uniquement des lettres et avoir au moins 3 caractères.';
         isValid = false;
       }
 
@@ -118,6 +124,7 @@ export default {
         isValid = false;
       }
 
+      // Validation de l'email
       const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
       if (!emailRegex.test(patient.value.email)) {
         errors.value.email =
@@ -164,6 +171,7 @@ export default {
   },
 };
 </script>
+
 
 <style scoped>
 .admin-dashboard {
