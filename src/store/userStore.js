@@ -6,6 +6,7 @@ export const useUtilisateurStore = defineStore("utilisateurs", {
   state: () => ({
     utilisateurs: [],
     specialites: [],
+    medecinsDisponibles: [],
     utilisateurActuel: null,
   }),
 
@@ -161,6 +162,24 @@ export const useUtilisateurStore = defineStore("utilisateurs", {
       }
     },
   },
+
+
+  async fetchMedecinsDisponibles(dateDebut, dateFin) {
+    const auth = useAuthStore();
+    try {
+      const response = await axios.get("http://localhost:3000/api/medecin", {
+        params: { dateDebut, dateFin },
+        headers: {
+          Authorization: `Bearer ${auth.token}`,
+        },
+      });
+      this.medecinsDisponibles = response.data;
+    } catch (error) {
+      console.error("Erreur lors de la récupération des médecins disponibles :", error);
+      this.medecinsDisponibles = [];
+    }
+  },
+  
 
   persist: {
     enabled: true,

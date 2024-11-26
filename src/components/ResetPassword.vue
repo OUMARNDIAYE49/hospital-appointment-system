@@ -1,23 +1,63 @@
 <template>
-  <div class="reset-password">
-    <h1 class="text-center mb-4">Nouveau mot de passe</h1>
+  <div class="container-center">
     <form @submit.prevent="resetPassword" class="shadow-lg p-4 rounded bg-white" autocomplete="off">
+      <h1 class="text-center mb-4">Nouveau mot de passe</h1>
+
       <!-- Champ pour le mot de passe -->
-      <div class="form-group mb-3">
+      <div class="form-group mb-3 position-relative password-field">
         <label for="password" class="form-label">Nouveau mot de passe</label>
-        <div class="input-group">
+        <div class="input-wrapper">
           <input
             :type="showPassword ? 'text' : 'password'"
-            :id="`password-${Date.now()}`"
+            id="password"
             v-model="password"
             class="form-control"
             placeholder="Entrez votre nouveau mot de passe"
             required
             autocomplete="new-password"
           />
-          <span class="input-group-text" @click="togglePasswordVisibility">
-            <i :class="showPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"></i>
+          <span class="toggle-password" @click="togglePasswordVisibility">
+            <!-- Icônes SVG -->
+            <svg
+              v-if="showPassword"
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="feather feather-eye-off"
+            >
+              <path
+                d="M17.94 17.94A10.05 10.05 0 0 1 12 19.5a10 10 0 0 1-9.5-6 9.97 9.97 0 0 1 1.64-2.01M12 5.5a10 10 0 0 1 9.5 6 9.97 9.97 0 0 1-1.64 2.01M3 3l18 18"
+              ></path>
+            </svg>
+            <svg
+              v-else
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="feather feather-eye"
+            >
+              <path
+                d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+              ></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
           </span>
+        </div>
+        <!-- Message d'erreur pour le mot de passe -->
+        <div v-if="passwordError" class="text-danger mt-1">
+          {{ passwordError }}
         </div>
       </div>
 
@@ -27,22 +67,23 @@
       </div>
 
       <!-- Bouton de soumission -->
-      <button type="submit" class="btn btn-primary w-100">Mettre à jour le mot de passe</button>
+      <button type="submit" class="btn btn-primary w-100 same-size-button">Mettre à jour le mot de passe</button>
     </form>
   </div>
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
-import { useAuthStore } from '@/store/authStore';
+import { ref, onMounted } from "vue";
+import { useAuthStore } from "@/store/authStore";
 import { useRoute, useRouter } from "vue-router";
 
 export default {
-  name: 'ResetPassword',
+  name: "ResetPassword",
   setup() {
     const authStore = useAuthStore();
-    const password = ref('');
-    const message = ref('');
+    const password = ref("");
+    const passwordError = ref(""); // Message d'erreur pour le mot de passe
+    const message = ref("");
     const success = ref(false);
     const showPassword = ref(false);
     const route = useRoute();
@@ -52,28 +93,42 @@ export default {
       showPassword.value = !showPassword.value;
     };
 
+    const validatePassword = () => {
+      const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{6,100}$/;
+      if (!passwordRegex.test(password.value)) {
+        passwordError.value =
+          "Le mot de passe doit contenir des lettres, des chiffres, et comporter entre 6 et 100 caractères.";
+        return false;
+      }
+      passwordError.value = "";
+      return true;
+    };
+
     const resetPassword = async () => {
+      if (!validatePassword()) return;
+
       const token = route.params.token;
       try {
         await authStore.resetPassword(token, password.value);
-        message.value = 'Votre mot de passe a été mis à jour avec succès.';
+        message.value = "Votre mot de passe a été mis à jour avec succès.";
         success.value = true;
-        password.value = ''; // Réinitialiser le champ après succès
+        password.value = ""; // Réinitialiser le champ après succès
         setTimeout(() => router.push("/"), 2000);
       } catch (error) {
-        message.value = "Erreur lors de la mise à jour du mot de passe. Veuillez réessayer.";
+        message.value =
+          "Erreur lors de la mise à jour du mot de passe. Veuillez réessayer.";
         success.value = false;
         console.error("Erreur lors de la mise à jour du mot de passe :", error);
       }
     };
 
-    // Réinitialise le mot de passe au chargement du composant
     onMounted(() => {
-      password.value = '';
+      password.value = "";
     });
 
     return {
       password,
+      passwordError,
       message,
       success,
       showPassword,
@@ -84,58 +139,45 @@ export default {
 };
 </script>
 
-
-
 <style scoped>
-.reset-password {
+.container-center {
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  margin-top: 20px;
-  padding: 20px;
-}
-
-h1 {
-  color: #004085;
-  font-weight: bold;
-  margin-top: 25px;
+  height: 100vh;
+  width: 100vw;
+  background-color: #3b5998;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 form {
-  max-width: 600px;
+  max-width: 500px;
   width: 100%;
   border-radius: 8px;
-}
-
-.shadow-lg {
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-}
-
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-.input-group-text {
-  cursor: pointer;
-}
-
-.btn-primary {
-  background-color: #0069d9;
-  border: none;
-}
-
-.btn-primary:hover {
-  opacity: 0.9;
-}
-
-.bg-white {
   background-color: #ffffff;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
-.form-control {
-  height: 45px;
-  font-size: 16px;
-  border-radius: 4px;
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-wrapper .form-control {
+  padding-right: 40px;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+  color: #6c757d;
 }
 
 .alert {
@@ -143,15 +185,5 @@ form {
   font-size: 14px;
   padding: 10px;
   border-radius: 5px;
-}
-
-.alert-success {
-  background-color: #d4edda;
-  color: #155724;
-}
-
-.alert-danger {
-  background-color: #f8d7da;
-  color: #721c24;
 }
 </style>

@@ -17,6 +17,7 @@
           class="form-control" 
           :min="minDate" 
           required 
+          @change="filterAvailableMedecins"
         />
       </div>
 
@@ -29,6 +30,7 @@
           class="form-control" 
           :min="minDate" 
           required 
+          @change="filterAvailableMedecins"
         />
       </div>
 
@@ -50,7 +52,7 @@
       </div>
 
       <div class="form-group mb-3">
-        <label for="medecin" class="form-label">Médecin</label>
+        <label for="medecin" class="form-label">Médecin Disponible</label>
         <select
           id="medecin"
           v-model="newAppointment.medecin_id"
@@ -58,7 +60,7 @@
           required
         >
           <option value="" disabled selected>Choisissez un médecin</option>
-          <option v-for="medecin in medecins" :key="medecin.id" :value="medecin.id">
+          <option v-for="medecin in availableMedecins" :key="medecin.id" :value="medecin.id">
             {{ medecin.nom }}
           </option>
         </select>
@@ -69,7 +71,7 @@
         <select id="status" v-model="newAppointment.status" class="form-select" required>
           <option value="" disabled selected>Choisissez un statut</option>
           <option value="confirmé">confirmé</option>
-          <option value="annulé">annulé</option>
+          <!-- <option value="annulé">annulé</option> -->
           <option value="en attente">en attente</option>
         </select>
       </div>
@@ -106,6 +108,7 @@ export default {
     });
 
     const errorMessage = ref('');
+    const availableMedecins = ref([]);
 
     onMounted(async () => {
       await userStore.loadDataFromApi();
@@ -114,6 +117,7 @@ export default {
 
     const patients = computed(() => patientStore.patients);
     const medecins = computed(() => userStore.utilisateurs.filter(user => user.role === 'MEDECIN'));
+    const appointments = computed(() => appointmentStore.appointments);
 
     const minDate = computed(() => {
       const today = new Date();
@@ -155,6 +159,25 @@ export default {
 
       errorMessage.value = '';
       return true;
+    };
+
+    const filterAvailableMedecins = () => {
+      const dateDebut = new Date(newAppointment.value.date_debut);
+      const dateFin = new Date(newAppointment.value.date_fin);
+
+      if (!validateDates()) {
+        availableMedecins.value = [];
+        return;
+      }
+
+      availableMedecins.value = medecins.value.filter(medecin => {
+        const medecinAppointments = appointments.value.filter(appointment => appointment.medecin_id === medecin.id);
+        return medecinAppointments.every(appointment => {
+          const appointmentStart = new Date(appointment.date_debut);
+          const appointmentEnd = new Date(appointment.date_fin);
+          return dateFin <= appointmentStart || dateDebut >= appointmentEnd;
+        });
+      });
     };
 
     const addAppointment = async () => {
@@ -205,13 +228,16 @@ export default {
       errorMessage,
       patients,
       medecins,
+      availableMedecins,
       addAppointment,
       goToList,
-      minDate
+      minDate,
+      filterAvailableMedecins,
     };
   },
 };
 </script>
+
 
 
 <style scoped>

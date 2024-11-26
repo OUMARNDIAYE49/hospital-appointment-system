@@ -69,9 +69,9 @@
       </div>
       <div class="d-flex justify-content-between">
         <button type="submit" class="btn btn-primary">Se connecter</button>
-        <button type="button" class="btn btn-outline-secondary" @click="resetForm">
+        <!-- <button type="button" class="btn btn-outline-secondary" @click="resetForm">
           Annuler
-        </button>
+        </button> -->
       </div>
     </form>
   </div>
@@ -178,7 +178,7 @@ h1 {
 }
 
 .btn {
-  width: 48%;
+  width: 100%;
 }
 
 .btn-primary {

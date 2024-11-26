@@ -113,14 +113,14 @@ export default {
       }
 
       // Validation du téléphone
-      const phoneRegex = /^[0-9+]+$/;
+      const phoneRegex = /^[0-9]+$/;
       if (
         !patient.value.telephone ||
         !phoneRegex.test(patient.value.telephone) ||
         patient.value.telephone.length < 8
       ) {
         errors.value.telephone =
-          'Le téléphone doit contenir au moins 8 chiffres et uniquement des chiffres ou "+".';
+          'Le téléphone doit contenir au moins 8 chiffres et uniquement des chiffres.';
         isValid = false;
       }
 

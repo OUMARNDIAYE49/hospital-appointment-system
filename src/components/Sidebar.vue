@@ -42,53 +42,29 @@
       <h2>Menu</h2>
       <ul>
         <li>
-          <router-link
-            to="/calendar"
-            exact-active-class="active-link"
-            @click="setVerticalMenu"
-          >
+          <router-link to="/calendar" exact-active-class="active-link">
             <font-awesome-icon icon="house" class="sidebar-icon" /> Accueil
           </router-link>
         </li>
         <li>
-          <router-link
-            to="/appointments"
-            exact-active-class="active-link"
-            @click="setVerticalMenu"
-          >
+          <router-link to="/appointments" exact-active-class="active-link">
             <font-awesome-icon icon="calendar-check" class="sidebar-icon" />
             Rendez-vous
           </router-link>
         </li>
-
-        <!-- Vérification du rôle pour afficher la gestion des utilisateurs -->
         <li v-if="authStore.getUser()?.role !== 'MEDECIN'">
-          <router-link
-            to="/users"
-            exact-active-class="active-link"
-            @click="setHorizontalMenu"
-          >
+          <router-link to="/users" exact-active-class="active-link">
             <font-awesome-icon icon="user-md" class="sidebar-icon" />
             Utilisateurs
           </router-link>
         </li>
-
         <li v-if="authStore.getUser()?.role !== 'MEDECIN'">
-          <router-link
-            to="/patients"
-            exact-active-class="active-link"
-            @click="setHorizontalMenu"
-          >
+          <router-link to="/patients" exact-active-class="active-link">
             <font-awesome-icon icon="bed" class="sidebar-icon" /> Patients
           </router-link>
         </li>
-
         <li v-if="authStore.getUser()?.role !== 'MEDECIN'">
-          <router-link
-            to="/specialties"
-            exact-active-class="active-link"
-            @click="setHorizontalMenu"
-          >
+          <router-link to="/specialties" exact-active-class="active-link">
             <font-awesome-icon icon="stethoscope" class="sidebar-icon" />
             Spécialités
           </router-link>
@@ -111,12 +87,6 @@ export default {
     },
   },
   methods: {
-    setHorizontalMenu() {
-      this.$emit("toggle-navbar", false);
-    },
-    setVerticalMenu() {
-      this.$emit("toggle-navbar", true);
-    },
     logout() {
       Swal.fire({
         title: "Déconnexion",
@@ -188,12 +158,10 @@ export default {
   gap: 15px;
 }
 
-/* Bouton utilisateur */
 .user-icon {
   margin-right: 8px;
 }
 
-/* Bouton déconnexion */
 .logout-button {
   color: #ffffff;
   text-decoration: none;
@@ -257,14 +225,19 @@ export default {
   color: #f1c40f;
 }
 
-/* Active link style */
 .active-link {
-  background-color: #3b5998;
+  background-color: #2c3e50;
   color: #f1c40f;
   font-weight: bold;
+  box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.2);
+  border-left: 4px solid #f1c40f;
 }
 
 .sidebar-icon {
   margin-right: 10px;
+}
+
+.active-link .sidebar-icon {
+  color: #f1c40f !important;
 }
 </style>

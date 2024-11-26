@@ -114,7 +114,7 @@
         <button type="submit" class="btn btn-primary" :disabled="!isPasswordValid">
           Valider
         </button>
-        <router-link to="/Calendar" class="btn btn-secondary">
+        <router-link to="/Calendar" class="btn btn-outline-secondary ">
           Annuler
         </router-link>
       </div>

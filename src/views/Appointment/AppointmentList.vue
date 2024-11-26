@@ -10,10 +10,6 @@
     </div>
 
     <div class="table-responsive">
-      <!-- <div class="search-bar mb-3">
-        <label for="search-date">Rechercher par date :</label>
-        <input type="date" id="search-date" v-model="searchDate" @input="filterAppointments" class="form-control" />
-      </div> -->
 
       <table class="table table-hover table-bordered text-start">
         <thead class="thead-dark">
@@ -134,7 +130,6 @@ export default {
     const showModal = ref(false);
     const editMode = ref(false);
     const selectedAppointment = ref({});
-    const searchDate = ref('');
     const errorMessage = ref('');
     
     const formatDate = (date) => {
@@ -299,7 +294,6 @@ export default {
     return {
       appointmentStore,
       patientStore,
-      searchDate,
       showModal,
       editMode,
       selectedAppointment,

@@ -35,7 +35,7 @@
         class="list text-decoration-none text-white me-5 fw-bold"
         to="/calendar"
       >
-        <button class="btn btn-danger mt-3 mb-4">Annuler</button>
+        <button class="btn btn-outline-secondary mt-3 mb-4">Annuler</button>
       </RouterLink>
     </form>
   </div>
@@ -84,7 +84,7 @@ const submitUpdate = async () => {
       confirmButtonText: "OK",
     });
 
-    router.push("/calendar");
+    router.push("/");
   } catch (error) {
     if (error.response && error.response.status === 409) {
       Swal.fire({

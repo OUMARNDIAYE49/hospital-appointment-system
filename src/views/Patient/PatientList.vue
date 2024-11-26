@@ -175,9 +175,9 @@ export default {
   }
 
   // Vérification : le téléphone doit être un nombre valide avec au moins 8 chiffres
-  const phoneRegex = /^[0-9+]+$/;
+  const phoneRegex = /^[0-9]+$/;
   if (!phoneRegex.test(selectedPatient.value.telephone) || selectedPatient.value.telephone.length < 8) {
-    errors.value.telephone = "Le téléphone doit être un nombre et contenir au moins 8 chiffres.";
+    errors.value.telephone = "Le téléphone doit contenir au moins 8 chiffres et uniquement des chiffres";
     isValid = false;
   }
 
