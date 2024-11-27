@@ -4,7 +4,7 @@
   </div>
   <div class="admin-dashboard">
     <div>
-      <button @click="navigateToAddAppointment" class="btn btn-primary">
+      <button  v-if="authStore && authStore.getUser() && authStore.getUser()?.role !== 'MEDECIN'" @click="navigateToAddAppointment" class="btn btn-primary">
         Ajouter Rendez-vous
       </button>
     </div>
@@ -34,8 +34,19 @@
             <td>{{ appointment.status }}</td>
             <td>
               <font-awesome-icon @click="viewAppointment(appointment)" icon="eye" class="action-icon text-info mx-2" />
-              <font-awesome-icon @click="editAppointment(appointment)" icon="pen" class="action-icon text-warning mx-2" />
-              <font-awesome-icon @click="deleteAppointment(appointment.id)" icon="trash" class="action-icon text-danger mx-2" />
+              <font-awesome-icon 
+  v-if="authStore && authStore.getUser() && authStore.getUser()?.role !== 'MEDECIN'" 
+  @click="editAppointment(appointment)" 
+  icon="pen" 
+  class="action-icon text-warning mx-2" 
+/>
+<font-awesome-icon 
+  v-if="authStore && authStore.getUser() && authStore.getUser()?.role !== 'MEDECIN'" 
+  @click="deleteAppointment(appointment.id)" 
+  icon="trash" 
+  class="action-icon text-danger mx-2" 
+/>
+
             </td>
           </tr>
         </tbody>
@@ -115,15 +126,24 @@ import { useAppointmentStore } from '@/store/appointmentStore';
 import { usePatientStore } from '@/store/patientStore';
 import { useRouter } from 'vue-router';
 import { useUtilisateurStore } from '@/store/userStore';
+import { useAuthStore } from '@/store/authStore';
+
 import Swal from 'sweetalert2';
 
 export default {
   name: 'AppointmentList',
+  computed: {
+    authStore() {
+      return useAuthStore();
+    },
+  },
   setup() {
     const appointmentStore = useAppointmentStore();
     const patientStore = usePatientStore();
     const router = useRouter();
     const userStore = useUtilisateurStore();
+    const authStore = useAuthStore();
+
 
     const medecins = computed(() => userStore.utilisateurs.filter(user => user.role === 'MEDECIN'));
 
@@ -171,7 +191,6 @@ export default {
       selectedAppointment.value = {};
     };
 
-    // Validation des dates
     const validateDates = () => {
       const dateDebut = new Date(selectedAppointment.value.date_debut);
       const dateFin = new Date(selectedAppointment.value.date_fin);
@@ -181,7 +200,6 @@ export default {
     errorMessage.value = "La date de début ne peut pas être dans le passé.";
     return false;
   }
-
 
       if (dateFin < dateDebut) {
         errorMessage.value = "La date de fin ne peut pas être antérieure à la date de début.";
@@ -200,13 +218,11 @@ export default {
         return false;
       }
 
-      errorMessage.value = ''; // Réinitialise le message d'erreur si toutes les validations sont correctes
+      errorMessage.value = ''; 
       return true;
     };
 
-    // Sauvegarder l'édition
-    const saveEdit = async () => {
-      // Valider les dates avant de sauvegarder
+    const saveEdit = async () => {er
       if (!validateDates()) {
         Swal.fire({
           icon: 'error',
@@ -222,20 +238,13 @@ export default {
           date_debut: selectedAppointment.value.date_debut,
           date_fin: selectedAppointment.value.date_fin,
           status: selectedAppointment.value.status,
-          patient_id: selectedAppointment.value.patient.id, // Utilise l'ID du patient
-          medecin_id: selectedAppointment.value.medecin.id // Utilise l'ID du médecin
+          patient_id: selectedAppointment.value.patient.id, 
+          medecin_id: selectedAppointment.value.medecin.id 
         };
 
-        // Appel pour mettre à jour le rendez-vous
         await appointmentStore.updateAppointment(selectedAppointment.value.id, updatedAppointment);
-
-        // Recharger les données de l'API
         await appointmentStore.loadDataFromApi();
-
-        // Fermer le modal
         closeModal();
-
-        // Afficher l'alerte de succès
         Swal.fire({
           icon: 'success',
           title: 'Modification réussie',
@@ -244,10 +253,8 @@ export default {
       }
     };
 
-    // Supprimer un rendez-vous avec confirmation
     const deleteAppointment = async (id) => {
       try {
-        // Affichage de l'alerte de confirmation avec SweetAlert2
         const result = await Swal.fire({
           title: 'Voulez-vous vraiment supprimer ce rendez-vous ?',
           text: "Cette action est irréversible.",
@@ -257,12 +264,10 @@ export default {
           cancelButtonText: 'Annuler',
           reverseButtons: true
         });
-
-        // Si l'utilisateur confirme la suppression
         if (result.isConfirmed) {
           console.log("Suppression de l'ID :", id);
           await appointmentStore.deleteAppointment(id);
-          await appointmentStore.loadDataFromApi(); // Recharge les données après suppression
+          await appointmentStore.loadDataFromApi(); 
           Swal.fire(
             'Supprimé!',
             'Le rendez-vous a été supprimé.',

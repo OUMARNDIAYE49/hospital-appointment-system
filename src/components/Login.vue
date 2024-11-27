@@ -25,7 +25,6 @@
             required
           />
           <span class="toggle-password" @click="togglePasswordVisibility">
-            <!-- SVG Icons -->
             <svg
             v-if="showPassword"
             xmlns="http://www.w3.org/2000/svg"
@@ -69,9 +68,6 @@
       </div>
       <div class="d-flex justify-content-between">
         <button type="submit" class="btn btn-primary">Se connecter</button>
-        <!-- <button type="button" class="btn btn-outline-secondary" @click="resetForm">
-          Annuler
-        </button> -->
       </div>
     </form>
   </div>

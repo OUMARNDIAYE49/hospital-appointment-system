@@ -49,20 +49,16 @@ const router = createRouter({
   routes,
 });
 
-// Navigation guard pour la vérification de l'authentification
 router.beforeEach((to, from, next) => {
   const store = useAuthStore();
-
-  // Vérifie si la route nécessite une authentification
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (!store.isAuthenticated) {
-      // Redirige vers la page de connexion si l'utilisateur n'est pas authentifié
       next({ name: 'Login' });
     } else {
-      next(); // Continue vers la route demandée si authentifié
+      next(); 
     }
   } else {
-    next(); // Continue si aucune authentification n'est requise
+    next(); 
   }
 });
 

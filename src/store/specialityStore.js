@@ -4,11 +4,10 @@ import { useAuthStore } from "./authStore";
 
 export const useSpecialiteStore = defineStore("specialites", {
   state: () => ({
-    specialites: [],  // Liste des spécialités
+    specialites: [],  
   }),
 
   actions: {
-    // Charger toutes les spécialités depuis l'API
     async loadDataFromApi() {
       const auth = useAuthStore();
       try {
@@ -20,23 +19,19 @@ export const useSpecialiteStore = defineStore("specialites", {
           }
         );
         this.specialites = response.data;
-        console.log("Spécialités chargées :", this.specialites); // Vérification des données
+        console.log("Spécialités chargées :", this.specialites); 
       } catch (error) {
         console.error("Erreur lors du chargement des spécialités :", error);
         this.specialites = [];
       }
     },
-
-    // Vérification de l'unicité de la spécialité par son nom
     isUniqueSpeciality(nom) {
       return !this.specialites.some(specialite => specialite.nom === nom);
     },
 
-    // Ajouter une nouvelle spécialité
     async addSpecialite(specialite) {
       const auth = useAuthStore();
 
-      // Vérification de l'unicité
       if (!this.isUniqueSpeciality(specialite.nom)) {
         throw new Error("Cette spécialité existe déjà.");
       }
@@ -50,14 +45,13 @@ export const useSpecialiteStore = defineStore("specialites", {
           }
         );
         this.specialites.push(response.data);
-        await this.loadDataFromApi();  // Rafraîchir la liste après ajout
+        await this.loadDataFromApi();  
       } catch (error) {
         console.error("Erreur lors de l'ajout de la spécialité :", error);
-        throw error;  // Relancer l'erreur pour gestion côté vue
+        throw error;  
       }
     },
 
-    // Mettre à jour une spécialité existante
     async updateSpecialite(id, updatedSpecialite) {
       const auth = useAuthStore();
       try {
@@ -80,8 +74,6 @@ export const useSpecialiteStore = defineStore("specialites", {
         return false;
       }
     },
-
-    // Supprimer une spécialité
     async deleteSpecialite(id) {
       const auth = useAuthStore();
       try {
@@ -99,7 +91,6 @@ export const useSpecialiteStore = defineStore("specialites", {
       }
     },
 
-    // Récupérer une spécialité par son ID
     getSpecialiteById(id) {
       return this.specialites.find(specialite => specialite.id === id);
     }

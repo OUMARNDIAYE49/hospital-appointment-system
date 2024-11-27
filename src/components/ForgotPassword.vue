@@ -17,7 +17,6 @@
       
       <div class="d-flex justify-content-between">
         <button type="submit" class="btn btn-primary">Envoyer le lien</button>
-        <!-- <button type="button" class="btn btn-outline-secondary" @click="resetForm">Annuler</button> -->
       </div>
       
       <div v-if="message" class="alert alert-success mt-3">

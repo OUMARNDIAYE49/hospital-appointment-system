@@ -4,11 +4,10 @@ import { useAuthStore } from "./authStore";
 
 export const usePatientStore = defineStore("patient", {
   state: () => ({
-    patients: [], // Liste des patients
+    patients: [], 
   }),
 
   actions: {
-    // Charger tous les patients depuis l'API
     async loadDataFromApi() {  
       const auth = useAuthStore();
       try {
@@ -23,7 +22,6 @@ export const usePatientStore = defineStore("patient", {
       }
     },
 
-    // Ajouter un patient
     async addPatient(patient) {
       const auth = useAuthStore();
       try {
@@ -38,8 +36,6 @@ export const usePatientStore = defineStore("patient", {
         console.error("Erreur lors de l'ajout du patient :", error);
       }
     },
-
-    // Mettre à jour un patient
     async updatePatient(id, updatedPatient) {
       const auth = useAuthStore();
       try {
@@ -58,15 +54,13 @@ export const usePatientStore = defineStore("patient", {
       }
     },
     
-    // Supprimer un patient
     async deletePatient(id) {
       const auth = useAuthStore();
       try {
-        // Vérifier si le patient a des rendez-vous avant de le supprimer
         const hasAppointments = await this.checkPatientAppointments(id);
         if (hasAppointments) {
           console.warn("Impossible de supprimer : le patient a des rendez-vous programmés.");
-          return false; // Annule la suppression
+          return false; 
         }
 
         await axios.delete(`http://localhost:3000/api/patients/${id}`, {
@@ -75,21 +69,18 @@ export const usePatientStore = defineStore("patient", {
           },
         });
         console.log("Patient supprimé avec succès");
-        // Recharger la liste des patients après la suppression
         await this.loadDataFromApi();
-        return true; // Retourne true si suppression réussie
+        return true; 
       } catch (error) {
         console.error("Erreur lors de la suppression du patient :", error);
-        return false; // Retourne false en cas d'erreur
+        return false;
       }
     },
 
-    // Récupérer un patient par son ID
     getPatientById(id) {
       return this.patients.find((patient) => patient.id === id);
     },
 
-    // Vérifier si un patient a des rendez-vous associés
     async checkPatientAppointments(id) {
       const auth = useAuthStore();
       try {
@@ -98,10 +89,10 @@ export const usePatientStore = defineStore("patient", {
             Authorization: `Bearer ${auth.token}`,
           },
         });
-        return response.data.length > 0; // Retourne true si des rendez-vous existent
+        return response.data.length > 0; 
       } catch (error) {
         console.error("Erreur lors de la vérification des rendez-vous :", error);
-        return false; // Retourne false en cas d'erreur
+        return false;
       }
     },
   },

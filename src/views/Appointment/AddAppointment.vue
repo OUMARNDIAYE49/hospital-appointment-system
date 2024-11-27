@@ -257,7 +257,7 @@ h1 {
 }
 
 form {
-  max-width: 500px;
+  max-width: 640px;
   width: 100%;
   border-radius: 8px;
 }

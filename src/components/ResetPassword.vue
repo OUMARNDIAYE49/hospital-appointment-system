@@ -3,7 +3,6 @@
     <form @submit.prevent="resetPassword" class="shadow-lg p-4 rounded bg-white" autocomplete="off">
       <h1 class="text-center mb-4">Nouveau mot de passe</h1>
 
-      <!-- Champ pour le mot de passe -->
       <div class="form-group mb-3 position-relative password-field">
         <label for="password" class="form-label">Nouveau mot de passe</label>
         <div class="input-wrapper">
@@ -17,7 +16,6 @@
             autocomplete="new-password"
           />
           <span class="toggle-password" @click="togglePasswordVisibility">
-            <!-- Icônes SVG -->
             <svg
               v-if="showPassword"
               xmlns="http://www.w3.org/2000/svg"
@@ -55,18 +53,13 @@
             </svg>
           </span>
         </div>
-        <!-- Message d'erreur pour le mot de passe -->
         <div v-if="passwordError" class="text-danger mt-1">
           {{ passwordError }}
         </div>
       </div>
-
-      <!-- Message d'alerte -->
       <div v-if="message" class="alert" :class="{'alert-success': success, 'alert-danger': !success}">
         {{ message }}
       </div>
-
-      <!-- Bouton de soumission -->
       <button type="submit" class="btn btn-primary w-100 same-size-button">Mettre à jour le mot de passe</button>
     </form>
   </div>
@@ -82,7 +75,7 @@ export default {
   setup() {
     const authStore = useAuthStore();
     const password = ref("");
-    const passwordError = ref(""); // Message d'erreur pour le mot de passe
+    const passwordError = ref(""); 
     const message = ref("");
     const success = ref(false);
     const showPassword = ref(false);
@@ -112,7 +105,7 @@ export default {
         await authStore.resetPassword(token, password.value);
         message.value = "Votre mot de passe a été mis à jour avec succès.";
         success.value = true;
-        password.value = ""; // Réinitialiser le champ après succès
+        password.value = ""; 
         setTimeout(() => router.push("/"), 2000);
       } catch (error) {
         message.value =

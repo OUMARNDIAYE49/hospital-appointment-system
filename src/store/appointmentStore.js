@@ -4,14 +4,13 @@ import { useAuthStore } from "./authStore";
 
 export const useAppointmentStore = defineStore("appointment", {
   state: () => ({
-    appointments: [], // Liste des rendez-vous
+    appointments: [], 
     patients: [],
     utilisateurs: [],
-    medecinsDisponibles: [], // Liste des médecins disponibles
+    medecinsDisponibles: [], 
   }),
 
   actions: {
-    // Charger tous les rendez-vous depuis l'API
     async loadDataFromApi() {
       const auth = useAuthStore();
       try {
@@ -27,7 +26,6 @@ export const useAppointmentStore = defineStore("appointment", {
       }
     },
 
-    // Ajouter un rendez-vous
     async addAppointment(appointment) {
       const auth = useAuthStore();
       try {
@@ -42,8 +40,6 @@ export const useAppointmentStore = defineStore("appointment", {
         console.error("Erreur lors de l'ajout du rendez-vous :", error);
       }
     },
-
-    // Mettre à jour un rendez-vous
     async updateAppointment(id, updatedAppointment) {
       const auth = useAuthStore();
       try {
@@ -61,8 +57,6 @@ export const useAppointmentStore = defineStore("appointment", {
         console.error("Erreur lors de la mise à jour du rendez-vous :", error);
       }
     },
-
-    // Supprimer un rendez-vous
     async deleteAppointment(id) {
       const auth = useAuthStore();
       try {
@@ -77,32 +71,10 @@ export const useAppointmentStore = defineStore("appointment", {
         console.error("Erreur lors de la suppression du rendez-vous :", error);
       }
     },
-
-    // Récupérer un rendez-vous par son ID
     getAppointmentById(id) {
       return this.appointments.find((appointment) => appointment.id === id);
     },
 
-    // Récupérer les médecins disponibles
-    // async fetchAvailableMedecins(dateDebut, dateFin) {
-    //   const auth = useAuthStore();
-    //   try {
-    //     const response = await axios.get("http://localhost:3000/api/medecin", {
-    //       params: {
-    //         dateDebut,
-    //         dateFin,
-    //       },
-    //       headers: {
-    //         Authorization: `Bearer ${auth.token}`,
-    //       },
-    //     });
-    //     this.medecinsDisponibles = response.data;
-    //     console.log("Médecins disponibles récupérés avec succès");
-    //   } catch (error) {
-    //     console.error("Erreur lors de la récupération des médecins disponibles :", error);
-    //     this.medecinsDisponibles = [];
-    //   }
-    // },
   },
 
   persist: true,
