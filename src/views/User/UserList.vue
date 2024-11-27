@@ -38,8 +38,6 @@
         </tbody>
       </table>
     </div>
-
-    <!-- Modal Détails Utilisateur -->
     <div v-if="showDetailsModal" class="modal" tabindex="-1" role="dialog" @click.self="closeDetailsModal">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -61,7 +59,6 @@
       </div>
     </div>
 
-    <!-- Modal Modifier Utilisateur -->
     <div v-if="showEditModal" class="modal" tabindex="-1" role="dialog" @click.self="closeEditModal">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -126,8 +123,6 @@ export default {
     const showEditModal = ref(false);
     const selectedUser = ref({});
     const specialites = computed(() => userStore.specialites);
-
-    // Erreurs de validation
     const nomError = ref('');
     const emailError = ref('');
 
@@ -173,24 +168,33 @@ export default {
 
     const validateNom = () => {
   const isAlpha = /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/.test(selectedUser.value.nom);
-  const isLongEnough = selectedUser.value.nom.length > 3;
+  const isLongEnough = selectedUser.value.nom.length >= 3;
+  const isNotTooLong = selectedUser.value.nom.length <= 100;
 
-  // Vérifie que le nom est valide et que sa longueur est supérieure à 3 caractères
   if (!isAlpha) {
-    nomError.value = 'Le nom doit contenir uniquement des lettres.';
+    nomError.value = 'Le nom doit contenir uniquement des lettres, des espaces.';
   } else if (!isLongEnough) {
-    nomError.value = 'Le nom doit comporter plus de 3 caractères.';
+    nomError.value = 'Le nom doit comporter au moins 3 caractères.';
+  } else if (!isNotTooLong) {
+    nomError.value = 'Le nom ne doit pas dépasser 100 caractères.';
   } else {
-    nomError.value = '';  // Si tout est valide, on vide l'erreur
+    nomError.value = ''; 
   }
 };
 
-    const validateEmail = () => {
-      const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
-      emailError.value = emailRegex.test(selectedUser.value.email)
-        ? ''
-        : "L'email doit être valide et se terminer par '@gmail.com'.";
-    };
+const validateEmail = () => {
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+  const isNotTooLong = selectedUser.value.email.length <= 50;
+
+  if (!emailRegex.test(selectedUser.value.email)) {
+    emailError.value = "L'email doit être valide et se terminer par '@gmail.com'.";
+  } else if (!isNotTooLong) {
+    emailError.value = "L'email ne doit pas dépasser 50 caractères.";
+  } else {
+    emailError.value = ''; 
+  }
+};
+
 
     const saveEdit = async () => {
       const id = selectedUser.value.id;

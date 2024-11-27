@@ -47,25 +47,23 @@ export default {
     const nomError = ref('');
 
     const validateNom = () => {
-  // Vérification que le nom ne contient que des lettres et des espaces, apostrophes et traits d'union
   const isAlpha = /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/.test(specialty.value.nom);
-  
-  // Vérification que le nom n'est pas plus long que 3 caractères
-  const isShortEnough = specialty.value.nom.length <= 3;
 
-  // Si le nom n'est pas valide, afficher une erreur appropriée
+  const isLongEnough = specialty.value.nom.length >= 3;
+  const isShortEnough = specialty.value.nom.length <= 100;
+
   if (!isAlpha) {
-    nomError.value = 'Le nom doit contenir uniquement des lettres.';
+    nomError.value = 'Le nom doit contenir uniquement des lettres, espaces, apostrophes ou traits d’union.';
+  } else if (!isLongEnough) {
+    nomError.value = 'Le nom doit contenir au moins 3 caractères.';
   } else if (!isShortEnough) {
-    nomError.value = 'Le nom ne doit pas contenir plus de 3 caractères.';
+    nomError.value = 'Le nom ne doit pas contenir plus de 100 caractères.';
   } else {
-    nomError.value = ''; // Aucune erreur si tout est correct
+    nomError.value = ''; 
   }
 };
 
-    // Fonction d'ajout de la spécialité
     const addSpecialty = async () => {
-      // Validation du nom
       validateNom();
 
       if (nomError.value) {
@@ -86,7 +84,6 @@ export default {
         return;
       }
 
-      // Vérifier l'unicité avant d'ajouter
       if (!specialiteStore.isUniqueSpeciality(specialty.value.nom)) {
         Swal.fire({
           icon: 'error',

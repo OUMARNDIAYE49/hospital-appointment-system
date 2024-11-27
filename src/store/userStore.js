@@ -163,7 +163,6 @@ export const useUtilisateurStore = defineStore("utilisateurs", {
     },
   },
 
-
   async fetchMedecinsDisponibles(dateDebut, dateFin) {
     const auth = useAuthStore();
     try {
@@ -180,7 +179,29 @@ export const useUtilisateurStore = defineStore("utilisateurs", {
     }
   },
   
-
+    async changePassword(currentPassword, newPassword) {
+      const auth = useAuthStore();
+      try {
+        const response = await axios.put(
+          "http://localhost:3000/api/user/change-password",
+          { currentPassword, newPassword },
+          {
+            headers: {
+              Authorization: `Bearer ${auth.token}`,
+            },
+          }
+        );
+        return response.data;
+      } catch (error) {
+        console.error("Erreur lors du changement de mot de passe :", error);
+        if (error.response) {
+          console.error("Réponse du serveur :", error.response.data);
+        }
+        throw new Error(
+          error.response?.data?.message || "Erreur lors du changement de mot de passe."
+        );
+      }
+    },
   persist: {
     enabled: true,
     strategies: [{ storage: localStorage, paths: ["utilisateurActuel"] }],

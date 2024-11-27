@@ -4,6 +4,8 @@
       @submit.prevent="submitUpdate"
       class="formulaire form mb-5 shadow p-3 mb-5 bg-body rounded"
     >
+      <h2 class="text-center mb-4">Modification du profil</h2>
+
       <div class="mb-3">
         <label for="name" class="form-label">Nom :</label>
         <input
@@ -11,8 +13,13 @@
           class="form-control"
           v-model="updatedName"
           id="name"
+          @blur="validateNom"
+          :class="{ 'is-invalid': nomError }"
           required
         />
+        <div v-if="nomError" class="invalid-feedback">
+          {{ nomError }}
+        </div>
       </div>
       <div class="mb-3">
         <label for="email" class="form-label">Email :</label>
@@ -21,13 +28,16 @@
           class="form-control"
           v-model="updatedEmail"
           id="email"
-          :class="{ 'is-invalid': !isEmailValid && updatedEmail }"
+          @blur="validateEmail"
+          :class="{ 'is-invalid': emailError }"
           required
         />
-        <div v-if="!isEmailValid && updatedEmail" class="invalid-feedback">
-          Veuillez entrer une adresse email valide.
+        <div v-if="emailError" class="invalid-feedback">
+          {{ emailError }}
         </div>
       </div>
+
+  
       <button class="btn btn-primary text-white mt-3 mb-4 me-3">
         Confirmer
       </button>
@@ -42,7 +52,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "../../store/authStore";
 import { useUtilisateurStore } from "../../store/userStore";
@@ -50,32 +60,54 @@ import Swal from "sweetalert2";
 
 const userStore = useAuthStore();
 const UtilisateurStore = useUtilisateurStore();
-
 const router = useRouter();
 
 const updatedName = ref(userStore.user.nom);
 const updatedEmail = ref(userStore.user.email);
+const updatedPhone = ref(userStore.user.phone || "");
 
-const validateEmail = (email) => {
-  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return regex.test(email);
+const nomError = ref("");
+const emailError = ref("");
+
+const validateNom = () => {
+  const isAlpha = /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/.test(updatedName.value);
+  const isLongEnough = updatedName.value.length >= 3;
+  const isNotTooLong = updatedName.value.length <= 100;
+
+  if (!isAlpha) {
+    nomError.value = "Le nom doit contenir uniquement des lettres, des espaces, des apostrophes ou des traits d’union.";
+  } else if (!isLongEnough) {
+    nomError.value = "Le nom doit contenir au moins 3 caractères.";
+  } else if (!isNotTooLong) {
+    nomError.value = "Le nom ne doit pas dépasser 100 caractères.";
+  } else {
+    nomError.value = "";
+  }
 };
 
-const isEmailValid = computed(() => validateEmail(updatedEmail.value));
+const validateEmail = () => {
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+  const isNotTooLong = updatedEmail.value.length <= 50;
+
+  if (!emailRegex.test(updatedEmail.value)) {
+    emailError.value = "L'email doit être valide et se terminer par '@gmail.com'.";
+  } else if (!isNotTooLong) {
+    emailError.value = "L'email ne doit pas dépasser 50 caractères.";
+  } else {
+    emailError.value = "";
+  }
+};
 
 const submitUpdate = async () => {
-  if (!isEmailValid.value) {
-    Swal.fire({
-      icon: "error",
-      title: "Email invalide",
-      text: "Veuillez entrer une adresse email valide.",
-      confirmButtonText: "OK",
-    });
-    return;
+  validateNom();
+  validateEmail();
+
+  if (nomError.value || emailError.value) {
+    return; 
   }
 
   try {
-    await UtilisateurStore.updateCurrentUser(updatedName.value, updatedEmail.value);
+    await UtilisateurStore.updateCurrentUser(updatedName.value, updatedEmail.value, updatedPhone.value);
 
     Swal.fire({
       icon: "success",
@@ -120,7 +152,7 @@ const submitUpdate = async () => {
   background-color: #24272a;
 }
 .formulaire {
-  width: 50%;
+  width: 40%;
   border-radius: 10px;
   padding: 20px;
   margin: auto;
@@ -135,5 +167,10 @@ textarea {
 .invalid-feedback {
   color: red;
   font-size: 0.875rem;
+}
+h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #343a40;
 }
 </style>

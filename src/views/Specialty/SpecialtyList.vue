@@ -31,8 +31,6 @@
         </tbody>
       </table>
     </div>
-
-    <!-- Modal pour afficher ou modifier la spécialité -->
     <div v-if="showModal" class="modal" tabindex="-1" role="dialog" @click.self="closeModal">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -89,17 +87,22 @@ export default {
     const specialties = computed(() => specialiteStore.specialites);
 
     const validateNom = () => {
-      const isAlpha = /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/.test(selectedSpecialty.value.nom);
-      const isShortEnough = selectedSpecialty.value.nom.length >= 3;
-      
-      if (!isAlpha) {
-        nomError.value = 'Le nom doit contenir uniquement des lettres.';
-      } else if (!isShortEnough) {
-        nomError.value = 'Le nom ne doit pas etre inferieur 3 caractères.';
-      } else {
-        nomError.value = '';
-      }
-    };
+  const isAlpha = /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/.test(selectedSpecialty.value.nom);
+
+  const isLongEnough = selectedSpecialty.value.nom.length >= 3;
+  const isShortEnough = selectedSpecialty.value.nom.length <= 100;
+
+  if (!isAlpha) {
+    nomError.value = 'Le nom doit contenir uniquement des lettres, espaces, apostrophes ou traits d’union.';
+  } else if (!isLongEnough) {
+    nomError.value = 'Le nom doit contenir au moins 3 caractères.';
+  } else if (!isShortEnough) {
+    nomError.value = 'Le nom ne doit pas dépasser 100 caractères.';
+  } else {
+    nomError.value = ''; 
+  }
+};
+
 
     const viewSpecialty = (specialty) => {
       selectedSpecialty.value = { ...specialty };
@@ -119,13 +122,10 @@ export default {
     };
 
     const saveEdit = async () => {
-      // Validation du nom de la spécialité
       validateNom();
       if (nomError.value) {
         return;
       }
-
-      // Vérifie si le nom existe déjà dans une autre spécialité
       if (specialties.value.some(specialty => specialty.nom === selectedSpecialty.value.nom && specialty.id !== selectedSpecialty.value.id)) {
         await Swal.fire({
           icon: 'warning',
@@ -140,7 +140,6 @@ export default {
         const id = selectedSpecialty.value.id;
         await specialiteStore.updateSpecialite(id, selectedSpecialty.value);
 
-        // Met à jour directement la liste pour voir les changements en temps réel
         const index = specialties.value.findIndex(specialty => specialty.id === id);
         if (index !== -1) {
           specialties.value[index] = { ...selectedSpecialty.value };

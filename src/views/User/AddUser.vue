@@ -110,37 +110,51 @@ export default {
     };
 
     const validateNom = () => {
-  // Vérification que le nom ne contient que des lettres et des espaces, apostrophes et traits d'union
   const isAlpha = /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/.test(nom.value);
-  
-  // Vérification que le nom a une longueur supérieure à 3 caractères
-  const isLongEnough = nom.value.length > 3;
 
-  // Si le nom n'est pas valide, afficher une erreur appropriée
+  const isLongEnough = nom.value.length >= 3;
+  const isNotTooLong = nom.value.length <= 100;
+
   if (!isAlpha) {
-    nomError.value = 'Le nom doit contenir uniquement des lettres.';
+    nomError.value = 'Le nom doit contenir uniquement des lettres, des espaces, des apostrophes ou des traits d’union.';
   } else if (!isLongEnough) {
-    nomError.value = 'Le nom doit contenir plus de 3 caractères.';
+    nomError.value = 'Le nom doit contenir au moins 3 caractères.';
+  } else if (!isNotTooLong) {
+    nomError.value = 'Le nom ne doit pas dépasser 100 caractères.';
   } else {
-    nomError.value = ''; // Aucune erreur si tout est correct
+    nomError.value = ''; 
   }
 };
 
+const validateEmail = () => {
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+  const isNotTooLong = email.value.length <= 50;
 
-    const validateEmail = () => {
-      const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
-      emailError.value = emailRegex.test(email.value)
-        ? ''
-        : "L'email doit être valide et se terminer par '@gmail.com'.";
-    };
+  if (!emailRegex.test(email.value)) {
+    emailError.value = "L'email doit être valide et se terminer par '@gmail.com'.";
+  } else if (!isNotTooLong) {
+    emailError.value = "L'email ne doit pas dépasser 50 caractères.";
+  } else {
+    emailError.value = ''; 
+  }
+};
 
-    const validatePassword = () => {
-      const hasLetters = /[A-Za-z]/.test(password.value);
-      const hasNumbers = /\d/.test(password.value);
-      passwordError.value = hasLetters && hasNumbers
-        ? ''
-        : 'Le mot de passe doit contenir des lettres et des chiffres.';
-    };
+const validatePassword = () => {
+  const hasLetters = /[A-Za-z]/.test(password.value);
+  const hasNumbers = /\d/.test(password.value);
+  const isLongEnough = password.value.length >= 6;
+  const isNotTooLong = password.value.length <= 100;
+
+  if (!hasLetters || !hasNumbers) {
+    passwordError.value = 'Le mot de passe doit contenir des lettres et des chiffres.';
+  } else if (!isLongEnough) {
+    passwordError.value = 'Le mot de passe doit contenir au moins 8 caractères.';
+  } else if (!isNotTooLong) {
+    passwordError.value = 'Le mot de passe ne doit pas dépasser 20 caractères.';
+  } else {
+    passwordError.value = ''; 
+  }
+};
 
     const addUser = async () => {
       validateNom();

@@ -100,7 +100,6 @@ export default {
       errors.value = {};
       let isValid = true;
 
-      // Validation du nom (lettres uniquement et au moins 3 caractères)
       const nameRegex = /^[a-zA-ZÀ-ÿ\s]+$/;
       if (
         !patient.value.nom ||
@@ -110,9 +109,11 @@ export default {
         errors.value.nom =
           'Le nom doit contenir uniquement des lettres et avoir au moins 3 caractères.';
         isValid = false;
+      } else if (patient.value.nom.length > 100) {
+        errors.value.nom = 'Le nom ne doit pas dépasser 100 caractères.';
+        isValid = false;
       }
 
-      // Validation du téléphone
       const phoneRegex = /^[0-9]+$/;
       if (
         !patient.value.telephone ||
@@ -122,13 +123,18 @@ export default {
         errors.value.telephone =
           'Le téléphone doit contenir au moins 8 chiffres et uniquement des chiffres.';
         isValid = false;
+      } else if (patient.value.telephone.length > 20) {
+        errors.value.telephone = 'Le téléphone ne doit pas dépasser 20 chiffres.';
+        isValid = false;
       }
 
-      // Validation de l'email
       const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
       if (!emailRegex.test(patient.value.email)) {
         errors.value.email =
           "L'email doit être valide et se terminer par '@gmail.com'.";
+        isValid = false;
+      } else if (patient.value.email.length > 50) {
+        errors.value.email = "L'email ne doit pas dépasser 50 caractères.";
         isValid = false;
       }
 

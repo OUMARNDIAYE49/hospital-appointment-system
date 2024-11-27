@@ -1,78 +1,28 @@
+<template>
+  <div class="change-password-container">
+    <h2>Changer le mot de passe</h2>
 
-  
-  <template>
-  <div>
-    <form
-      @submit.prevent="submitPasswordChange"
-      class="formulaire form mb-5 shadow p-3 mb-5 bg-body rounded"
-    >
-      <!-- Ancien mot de passe -->
-      <div class="mb-3">
-        <label for="oldPassword" class="form-label">Ancien mot de passe :</label>
-        <div class="input-group">
+    <form v-if="formVisible" @submit.prevent="handleSubmit">
+      
+      <div class="form-group">
+        <label for="oldPassword">Ancien mot de passe</label>
+        <div class="password-input-container">
           <input
-            :type="showOldPassword ? 'text' : 'password'"
-            class="form-control"
-            v-model="currentPassword"
+            :type="oldPasswordVisible ? 'text' : 'password'"
             id="oldPassword"
-            required
+            v-model="oldPassword"
             autocomplete="new-password"
-          />
-          <span class="input-group-text" @click="toggleOldPasswordVisibility" style="cursor: pointer;">
-            <svg
-              v-if="showOldPassword"
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="feather feather-eye-off"
-            >
-              <path
-                d="M17.94 17.94A10.05 10.05 0 0 1 12 19.5a10 10 0 0 1-9.5-6 9.97 9.97 0 0 1 1.64-2.01M12 5.5a10 10 0 0 1 9.5 6 9.97 9.97 0 0 1-1.64 2.01M3 3l18 18"
-              ></path>
-            </svg>
-            <svg
-              v-else
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="feather feather-eye"
-            >
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-              <circle cx="12" cy="12" r="3"></circle>
-            </svg>
-          </span>
-        </div>
-      </div>
-
-      <!-- Nouveau mot de passe -->
-      <div class="mb-3">
-        <label for="newPassword" class="form-label">Nouveau mot de passe :</label>
-        <div class="input-group">
-          <input
-            :type="showNewPassword ? 'text' : 'password'"
-            class="form-control"
-            v-model="newPassword"
-            id="newPassword"
-            :class="{ 'is-invalid': !isPasswordValid && newPassword }"
             required
-            
+            placeholder="Entrez votre ancien mot de passe"
           />
-          <span class="input-group-text" @click="toggleNewPasswordVisibility" style="cursor: pointer;">
+          <span class="toggle-password" @click="togglePasswordVisibility('oldPassword')">
+       
             <svg
-              v-if="showNewPassword"
+              v-if="oldPasswordVisible"
               xmlns="http://www.w3.org/2000/svg"
               width="20"
               height="20"
+              viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               stroke-width="2"
@@ -89,6 +39,7 @@
               xmlns="http://www.w3.org/2000/svg"
               width="20"
               height="20"
+              viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               stroke-width="2"
@@ -96,114 +47,353 @@
               stroke-linejoin="round"
               class="feather feather-eye"
             >
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <path
+                d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+              ></path>
               <circle cx="12" cy="12" r="3"></circle>
             </svg>
           </span>
         </div>
-        <div
-          v-if="newPassword && !isPasswordValid"
-          class="invalid-feedback"
-        >
-          Le mot de passe doit contenir au moins 8 caractères.
+      </div>
+      <div class="form-group">
+        <label for="newPassword">Nouveau mot de passe</label>
+        <div class="password-input-container">
+          <input
+            :type="newPasswordVisible ? 'text' : 'password'"
+            id="newPassword"
+            v-model="newPassword"
+            autocomplete="new-password"
+            required
+            placeholder="Entrez votre nouveau mot de passe"
+          />
+          <span class="toggle-password" @click="togglePasswordVisibility('newPassword')">
+          
+            <svg
+              v-if="newPasswordVisible"
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="feather feather-eye-off"
+            >
+              <path
+                d="M17.94 17.94A10.05 10.05 0 0 1 12 19.5a10 10 0 0 1-9.5-6 9.97 9.97 0 0 1 1.64-2.01M12 5.5a10 10 0 0 1 9.5 6 9.97 9.97 0 0 1-1.64 2.01M3 3l18 18"
+              ></path>
+            </svg>
+            <svg
+              v-else
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="feather feather-eye"
+            >
+              <path
+                d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+              ></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </span>
         </div>
       </div>
 
-      <!-- Boutons -->
-      <div class="mb-3 d-flex justify-content-between">
-        <button type="submit" class="btn btn-primary" :disabled="!isPasswordValid">
-          Valider
-        </button>
-        <router-link to="/Calendar" class="btn btn-outline-secondary ">
-          Annuler
-        </router-link>
+      <div class="form-group">
+        <label for="confirmPassword">Confirmer le nouveau mot de passe</label>
+        <div class="password-input-container">
+          <input
+            :type="confirmPasswordVisible ? 'text' : 'password'"
+            id="confirmPassword"
+            v-model="confirmPassword"
+            autocomplete="new-password"
+            required
+            placeholder="Confirmez votre nouveau mot de passe"
+          />
+          <span class="toggle-password" @click="togglePasswordVisibility('confirmPassword')">
+          
+            <svg
+              v-if="confirmPasswordVisible"
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="feather feather-eye-off"
+            >
+              <path
+                d="M17.94 17.94A10.05 10.05 0 0 1 12 19.5a10 10 0 0 1-9.5-6 9.97 9.97 0 0 1 1.64-2.01M12 5.5a10 10 0 0 1 9.5 6 9.97 9.97 0 0 1-1.64 2.01M3 3l18 18"
+              ></path>
+            </svg>
+            <svg
+              v-else
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="feather feather-eye"
+            >
+              <path
+                d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+              ></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </span>
+        </div>
       </div>
+
+      <button type="submit" :disabled="isSubmitting">
+        Changer le mot de passe
+      </button>
     </form>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { useUtilisateurStore } from "@/store/userStore"; 
+import { useUtilisateurStore } from "../../store/userStore";
 import Swal from "sweetalert2";
 
+const userStore = useUtilisateurStore();
 const router = useRouter();
-const utilisateurStore = useUtilisateurStore(); 
-
-const currentPassword = ref("");
+const oldPassword = ref("");
 const newPassword = ref("");
-const showOldPassword = ref(false);
-const showNewPassword = ref(false);
+const confirmPassword = ref("");
+const passwordError = ref("");  
+const isSubmitting = ref(false);
+const oldPasswordVisible = ref(false);
+const newPasswordVisible = ref(false);
+const confirmPasswordVisible = ref(false);
+const formVisible = ref(false);
 
-const isPasswordValid = computed(() => newPassword.value.length >= 8);
-
-const toggleOldPasswordVisibility = () => {
-  showOldPassword.value = !showOldPassword.value;
-};
-
-const toggleNewPasswordVisibility = () => {
-  showNewPassword.value = !showNewPassword.value;
-};
-
-const submitPasswordChange = async () => {
-  if (!isPasswordValid.value) {
-    Swal.fire({
-      icon: "error",
-      title: "Mot de passe invalide",
-      text: "Le nouveau mot de passe doit contenir au moins 8 caractères.",
-      confirmButtonText: "OK",
-    });
-    return;
+const togglePasswordVisibility = (field) => {
+  if (field === "oldPassword") {
+    oldPasswordVisible.value = !oldPasswordVisible.value;
+  } else if (field === "newPassword") {
+    newPasswordVisible.value = !newPasswordVisible.value;
+  } else if (field === "confirmPassword") {
+    confirmPasswordVisible.value = !confirmPasswordVisible.value;
   }
+};
 
+const resetForm = () => {
+  oldPassword.value = "";
+  newPassword.value = "";
+  confirmPassword.value = "";
+  passwordError.value = "";
+};
+
+const validatePassword = () => {
+  const hasLetters = /[A-Za-z]/.test(newPassword.value);
+  const hasNumbers = /\d/.test(newPassword.value);
+  const isLongEnough = newPassword.value.length >= 6;
+  const isNotTooLong = newPassword.value.length <= 100;
+
+  if (!hasLetters || !hasNumbers) {
+    passwordError.value = 'Le mot de passe doit contenir des lettres et des chiffres.';
+  } else if (!isLongEnough) {
+    passwordError.value = 'Le mot de passe doit contenir au moins 6 caractères.';
+  } else if (!isNotTooLong) {
+    passwordError.value = 'Le mot de passe ne doit pas dépasser 100 caractères.';
+  } else {
+    passwordError.value = ''; 
+  }
+};
+
+const handleSubmit = async () => {
   try {
-    await utilisateurStore.changePassword(currentPassword.value, newPassword.value);
+    isSubmitting.value = true;
+    validatePassword();
+    if (passwordError.value) {
+      Swal.fire({
+        icon: "error",
+        title: "Erreur",
+        text: passwordError.value,
+      });
+      return;
+    }
+    if (newPassword.value !== confirmPassword.value) {
+      Swal.fire({
+        icon: "error",
+        title: "Erreur",
+        text: "Le mot de passe confirmé ne correspond pas au nouveau mot de passe.",
+      });
+      return;
+    }
+    await userStore.changePassword(oldPassword.value, newPassword.value);
 
     Swal.fire({
       icon: "success",
       title: "Succès",
-      text: "Votre mot de passe a été changé avec succès.",
-      confirmButtonText: "OK",
+      text: "Votre mot de passe a été changé avec succès !",
     });
+    resetForm();
 
     router.push("/");
   } catch (error) {
-    Swal.fire({
-      icon: "error",
-      title: "Erreur",
-      text: "Une erreur s'est produite lors du changement de mot de passe.",
-      confirmButtonText: "OK",
-    });
+    const errorMessage = error.response?.data?.message;
+
+    if (errorMessage === "Ancien mot de passe incorrect") {
+      Swal.fire({
+        icon: "error",
+        title: "Erreur",
+        text: "L'ancien mot de passe que vous avez saisi est incorrect. Veuillez réessayer.",
+      });
+    } else if (errorMessage === "Validation échouée") {
+      Swal.fire({
+        icon: "error",
+        title: "Erreur",
+        text: "Le nouveau mot de passe ne respecte pas les critères requis.",
+      });
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Erreur",
+        text: errorMessage || "Une erreur inattendue s'est produite.",
+      });
+    }
+  } finally {
+    isSubmitting.value = false;
   }
 };
 
+onMounted(() => {
+  formVisible.value = true;
+});
 </script>
 
 
-  <style scoped>
-  .clr {
-    background-color: #343a40;
-  }
-  .clr:hover {
-    background-color: #24272a;
-  }
-  .formulaire {
-    width: 50%;
-    border-radius: 10px;
-    padding: 20px;
-    margin: auto;
-    margin-top: 16vh;
-  }
-  textarea {
-    resize: none;
-  }
-  .is-invalid {
-    border-color: red;
-  }
-  .invalid-feedback {
-    color: red;
-    font-size: 0.875rem;
-  }
-  </style>
-  
+
+
+<style scoped>
+.change-password-container {
+  max-width: 450px;
+  margin: 50px auto;
+  padding: 30px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  font-family: "Arial", sans-serif;
+  margin-top: 80px;
+}
+
+.password-input-container {
+  position: relative;
+  width: 100%;
+}
+
+input {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+h2 {
+  text-align: center;
+  color: #4e4e4e;
+  margin-bottom: 20px;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #333;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #555;
+  background-color: #fafafa;
+  transition: border-color 0.3s ease-in-out;
+}
+
+.form-group input:focus {
+  border-color: #007bff;
+  outline: none;
+  background-color: #fff;
+}
+
+.password-input-container {
+  position: relative;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 10px;
+  top: 12px;
+  cursor: pointer;
+  color: #007bff;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  background-color: transparent;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-bottom: 20px;
+}
+
+.back-button i {
+  margin-right: 8px;
+}
+</style>

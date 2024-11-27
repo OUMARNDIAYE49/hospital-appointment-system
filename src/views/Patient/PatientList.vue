@@ -164,7 +164,6 @@ export default {
   let isValid = true;
   errors.value = { nom: '', telephone: '', email: '' };
 
-  // Vérification : le nom doit contenir au moins 3 caractères et uniquement des lettres
   const nameRegex = /^[a-zA-ZÀ-ÿ\s]+$/;
   if (!nameRegex.test(selectedPatient.value.nom)) {
     errors.value.nom = "Le nom ne doit contenir que des lettres et des espaces.";
@@ -172,25 +171,36 @@ export default {
   } else if (selectedPatient.value.nom.length < 3) {
     errors.value.nom = "Le nom doit contenir au moins 3 caractères.";
     isValid = false;
-  }
-
-  // Vérification : le téléphone doit être un nombre valide avec au moins 8 chiffres
-  const phoneRegex = /^[0-9]+$/;
-  if (!phoneRegex.test(selectedPatient.value.telephone) || selectedPatient.value.telephone.length < 8) {
-    errors.value.telephone = "Le téléphone doit contenir au moins 8 chiffres et uniquement des chiffres";
+  } else if (selectedPatient.value.nom.length > 100) {
+    errors.value.nom = "Le nom ne doit pas dépasser 100 caractères.";
     isValid = false;
   }
 
-  // Vérification : l'email doit être valide
+  // Vérification : le téléphone doit être un nombre valide entre 8 et 20 chiffres
+  const phoneRegex = /^[0-9]+$/;
+  if (!phoneRegex.test(selectedPatient.value.telephone)) {
+    errors.value.telephone = "Le téléphone doit contenir uniquement des chiffres.";
+    isValid = false;
+  } else if (selectedPatient.value.telephone.length < 8) {
+    errors.value.telephone = "Le téléphone doit contenir au moins 8 chiffres.";
+    isValid = false;
+  } else if (selectedPatient.value.telephone.length > 20) {
+    errors.value.telephone = "Le téléphone ne doit pas dépasser 20 chiffres.";
+    isValid = false;
+  }
+
+  // Vérification : l'email doit être valide et ne pas dépasser 50 caractères
   const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
   if (!emailRegex.test(selectedPatient.value.email)) {
     errors.value.email = "L'email doit être valide et se terminer par '@gmail.com'.";
+    isValid = false;
+  } else if (selectedPatient.value.email.length > 50) {
+    errors.value.email = "L'email ne doit pas dépasser 50 caractères.";
     isValid = false;
   }
 
   return isValid;
 };
-
 
     const checkUniqueFields = async () => {
       const existingPhone = patients.value.find(patient => patient.telephone === selectedPatient.value.telephone && patient.id !== selectedPatient.value.id);
