@@ -69,7 +69,7 @@ Bienvenue dans le projet de Gestion de Rendez-vous ! Cette application permet de
 Avant de commencer, assurez-vous d'avoir installé les éléments suivants sur votre machine :
 
 - [Node.js](https://nodejs.org/) (v16 ou supérieure)
-
+- Vue.js 3 
 
 
 ## Technologies utilisées
