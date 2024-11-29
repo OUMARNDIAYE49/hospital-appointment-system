@@ -7,6 +7,7 @@ export const useUtilisateurStore = defineStore("utilisateurs", {
     utilisateurs: [],
     specialites: [],
     medecinsDisponibles: [],
+    patientsDisponibles: [],
     utilisateurActuel: null,
   }),
 
@@ -178,6 +179,26 @@ export const useUtilisateurStore = defineStore("utilisateurs", {
       this.medecinsDisponibles = [];
     }
   },
+
+  // async fetchPatientsDisponibles(dateDebut, dateFin) {
+  //   const auth = useAuthStore(); // Récupérer le store d'authentification
+  //   try {
+  //     // Appel à l'API pour récupérer les patients disponibles en fonction des dates
+  //     const response = await axios.get("http://localhost:3000/api/patients/telephones-disponibles", {
+  //       params: { dateDebut, dateFin },  // Passage des dates de début et de fin
+  //       headers: {
+  //         Authorization: `Bearer ${auth.token}`, // Ajout du token d'authentification dans les en-têtes
+  //       },
+  //     });
+
+  //     // Si l'appel est réussi, on met à jour la liste des patients disponibles
+  //     this.patientsDisponibles = response.data;
+  //   } catch (error) {
+  //     console.error("Erreur lors de la récupération des patients disponibles :", error);
+  //     // En cas d'erreur, on vide la liste des patients disponibles
+  //     this.patientsDisponibles = [];
+  //   }
+  // },
   
     async changePassword(currentPassword, newPassword) {
       const auth = useAuthStore();

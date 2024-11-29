@@ -110,19 +110,21 @@ export default {
     };
 
     const validateNom = () => {
-  const isAlpha = /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/.test(nom.value);
+  const trimmedNom = nom.value.trim();
+  const isAlpha = /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/.test(trimmedNom);
+  const isLongEnough = trimmedNom.length >= 3;
+  const isNotTooLong = trimmedNom.length <= 100;
 
-  const isLongEnough = nom.value.length >= 3;
-  const isNotTooLong = nom.value.length <= 100;
-
-  if (!isAlpha) {
+  if (!trimmedNom) {
+    nomError.value = 'Le champ nom ne peut pas être vide.';
+  } else if (!isAlpha) {
     nomError.value = 'Le nom doit contenir uniquement des lettres, des espaces, des apostrophes ou des traits d’union.';
   } else if (!isLongEnough) {
     nomError.value = 'Le nom doit contenir au moins 3 caractères.';
   } else if (!isNotTooLong) {
     nomError.value = 'Le nom ne doit pas dépasser 100 caractères.';
   } else {
-    nomError.value = ''; 
+    nomError.value = '';
   }
 };
 

@@ -70,9 +70,10 @@ const nomError = ref("");
 const emailError = ref("");
 
 const validateNom = () => {
-  const isAlpha = /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/.test(updatedName.value);
-  const isLongEnough = updatedName.value.length >= 3;
-  const isNotTooLong = updatedName.value.length <= 100;
+  const trimmedName = updatedName.value.trim(); // Supprime les espaces inutiles au début et à la fin
+  const isAlpha = /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/.test(trimmedName);
+  const isLongEnough = trimmedName.length >= 3;
+  const isNotTooLong = trimmedName.length <= 100;
 
   if (!isAlpha) {
     nomError.value = "Le nom doit contenir uniquement des lettres, des espaces, des apostrophes ou des traits d’union.";
@@ -81,9 +82,10 @@ const validateNom = () => {
   } else if (!isNotTooLong) {
     nomError.value = "Le nom ne doit pas dépasser 100 caractères.";
   } else {
-    nomError.value = "";
+    nomError.value = ""; 
   }
 };
+
 
 const validateEmail = () => {
   const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;

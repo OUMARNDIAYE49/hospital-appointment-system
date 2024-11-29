@@ -191,6 +191,7 @@ export default {
       selectedAppointment.value = {};
     };
 
+    // Validation des dates
     const validateDates = () => {
       const dateDebut = new Date(selectedAppointment.value.date_debut);
       const dateFin = new Date(selectedAppointment.value.date_fin);
@@ -200,6 +201,7 @@ export default {
     errorMessage.value = "La date de début ne peut pas être dans le passé.";
     return false;
   }
+
 
       if (dateFin < dateDebut) {
         errorMessage.value = "La date de fin ne peut pas être antérieure à la date de début.";
@@ -218,11 +220,13 @@ export default {
         return false;
       }
 
-      errorMessage.value = ''; 
+      errorMessage.value = ''; // Réinitialise le message d'erreur si toutes les validations sont correctes
       return true;
     };
 
-    const saveEdit = async () => {er
+    // Sauvegarder l'édition
+    const saveEdit = async () => {
+      // Valider les dates avant de sauvegarder
       if (!validateDates()) {
         Swal.fire({
           icon: 'error',
@@ -238,13 +242,20 @@ export default {
           date_debut: selectedAppointment.value.date_debut,
           date_fin: selectedAppointment.value.date_fin,
           status: selectedAppointment.value.status,
-          patient_id: selectedAppointment.value.patient.id, 
-          medecin_id: selectedAppointment.value.medecin.id 
+          patient_id: selectedAppointment.value.patient.id, // Utilise l'ID du patient
+          medecin_id: selectedAppointment.value.medecin.id // Utilise l'ID du médecin
         };
 
+        // Appel pour mettre à jour le rendez-vous
         await appointmentStore.updateAppointment(selectedAppointment.value.id, updatedAppointment);
+
+        // Recharger les données de l'API
         await appointmentStore.loadDataFromApi();
+
+        // Fermer le modal
         closeModal();
+
+        // Afficher l'alerte de succès
         Swal.fire({
           icon: 'success',
           title: 'Modification réussie',
@@ -253,8 +264,10 @@ export default {
       }
     };
 
+    // Supprimer un rendez-vous avec confirmation
     const deleteAppointment = async (id) => {
       try {
+        // Affichage de l'alerte de confirmation avec SweetAlert2
         const result = await Swal.fire({
           title: 'Voulez-vous vraiment supprimer ce rendez-vous ?',
           text: "Cette action est irréversible.",
@@ -264,10 +277,12 @@ export default {
           cancelButtonText: 'Annuler',
           reverseButtons: true
         });
+
+        // Si l'utilisateur confirme la suppression
         if (result.isConfirmed) {
           console.log("Suppression de l'ID :", id);
           await appointmentStore.deleteAppointment(id);
-          await appointmentStore.loadDataFromApi(); 
+          await appointmentStore.loadDataFromApi(); // Recharge les données après suppression
           Swal.fire(
             'Supprimé!',
             'Le rendez-vous a été supprimé.',

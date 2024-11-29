@@ -47,13 +47,17 @@ export default {
     const nomError = ref('');
 
     const validateNom = () => {
-  const isAlpha = /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/.test(specialty.value.nom);
+  const trimmedNom = specialty.value.nom.trim(); 
+  const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/; 
 
-  const isLongEnough = specialty.value.nom.length >= 3;
-  const isShortEnough = specialty.value.nom.length <= 100;
+  const isAlpha = nameRegex.test(trimmedNom);
+  const isLongEnough = trimmedNom.length >= 3;
+  const isShortEnough = trimmedNom.length <= 100;
 
-  if (!isAlpha) {
-    nomError.value = 'Le nom doit contenir uniquement des lettres, espaces, apostrophes ou traits d’union.';
+  if (!trimmedNom) {
+    nomError.value = 'Le nom est requis.';
+  } else if (!isAlpha) {
+    nomError.value = 'Le nom doit contenir uniquement des lettres, des espaces, des apostrophes ou des traits d’union.';
   } else if (!isLongEnough) {
     nomError.value = 'Le nom doit contenir au moins 3 caractères.';
   } else if (!isShortEnough) {

@@ -93,25 +93,34 @@ export default {
     });
 
     const errors = ref({});
-
     const maxDate = new Date().toISOString().split('T')[0];
 
     const validateForm = () => {
       errors.value = {};
       let isValid = true;
 
-      const nameRegex = /^[a-zA-ZÀ-ÿ\s]+$/;
-      if (
-        !patient.value.nom ||
-        !nameRegex.test(patient.value.nom) ||
-        patient.value.nom.length < 3
-      ) {
-        errors.value.nom =
-          'Le nom doit contenir uniquement des lettres et avoir au moins 3 caractères.';
+      const nameRegex = /^[A-Za-zÀ-ÿ\s'-]+$/;
+
+      if (!patient.value.nom || patient.value.nom.trim() === '') {
+        errors.value.nom = 'Le nom est requis.';
         isValid = false;
-      } else if (patient.value.nom.length > 100) {
-        errors.value.nom = 'Le nom ne doit pas dépasser 100 caractères.';
-        isValid = false;
+      } else {
+        const trimmedName = patient.value.nom.trim();
+        const isAlpha = nameRegex.test(trimmedName);
+        const isLongEnough = trimmedName.length >= 3;
+        const isNotTooLong = trimmedName.length <= 100;
+
+        if (!isAlpha) {
+          errors.value.nom =
+            'Le nom doit contenir uniquement des lettres, des espaces, des apostrophes ou des traits d’union.';
+          isValid = false;
+        } else if (!isLongEnough) {
+          errors.value.nom = 'Le nom doit contenir au moins 3 caractères.';
+          isValid = false;
+        } else if (!isNotTooLong) {
+          errors.value.nom = 'Le nom ne doit pas dépasser 100 caractères.';
+          isValid = false;
+        }
       }
 
       const phoneRegex = /^[0-9]+$/;
@@ -141,8 +150,31 @@ export default {
       return isValid;
     };
 
+    const checkExistingPatient = () => {
+      const existingPatient = patientStore.patients.find(
+        (p) =>
+          p.telephone === patient.value.telephone ||
+          p.email === patient.value.email
+      );
+
+      if (existingPatient) {
+        if (existingPatient.telephone === patient.value.telephone) {
+          errors.value.telephone = 'Ce numéro de téléphone existe déjà.';
+        }
+        if (existingPatient.email === patient.value.email) {
+          errors.value.email = 'Cet email existe déjà.';
+        }
+        return true;
+      }
+      return false;
+    };
+
     const addPatient = async () => {
       if (!validateForm()) {
+        return;
+      }
+
+      if (checkExistingPatient()) {
         return;
       }
 
@@ -177,6 +209,7 @@ export default {
   },
 };
 </script>
+
 
 
 <style scoped>

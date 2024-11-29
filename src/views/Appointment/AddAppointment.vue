@@ -17,7 +17,7 @@
           class="form-control" 
           :min="minDate" 
           required 
-          @change="filterAvailableMedecins"
+          @change="filterAvailablePatientsAndMedecins"
         />
       </div>
 
@@ -30,7 +30,7 @@
           class="form-control" 
           :min="minDate" 
           required 
-          @change="filterAvailableMedecins"
+          @change="filterAvailablePatientsAndMedecins"
         />
       </div>
 
@@ -45,7 +45,7 @@
           required
         >
           <option value="" disabled selected>Choisissez un téléphone</option>
-          <option v-for="patient in patients" :key="patient.id" :value="patient.id">
+          <option v-for="patient in availablePatients" :key="patient.id" :value="patient.id">
             {{ patient.telephone }}
           </option>
         </select>
@@ -71,7 +71,6 @@
         <select id="status" v-model="newAppointment.status" class="form-select" required>
           <option value="" disabled selected>Choisissez un statut</option>
           <option value="confirmé">confirmé</option>
-          <!-- <option value="annulé">annulé</option> -->
           <option value="en attente">en attente</option>
         </select>
       </div>
@@ -109,6 +108,7 @@ export default {
 
     const errorMessage = ref('');
     const availableMedecins = ref([]);
+    const availablePatients = ref([]);
 
     onMounted(async () => {
       await userStore.loadDataFromApi();
@@ -161,18 +161,30 @@ export default {
       return true;
     };
 
-    const filterAvailableMedecins = () => {
+    const filterAvailablePatientsAndMedecins = () => {
       const dateDebut = new Date(newAppointment.value.date_debut);
       const dateFin = new Date(newAppointment.value.date_fin);
 
       if (!validateDates()) {
         availableMedecins.value = [];
+        availablePatients.value = [];
         return;
       }
 
+      // Filtrer les médecins disponibles
       availableMedecins.value = medecins.value.filter(medecin => {
         const medecinAppointments = appointments.value.filter(appointment => appointment.medecin_id === medecin.id);
         return medecinAppointments.every(appointment => {
+          const appointmentStart = new Date(appointment.date_debut);
+          const appointmentEnd = new Date(appointment.date_fin);
+          return dateFin <= appointmentStart || dateDebut >= appointmentEnd;
+        });
+      });
+
+      // Filtrer les patients disponibles
+      availablePatients.value = patients.value.filter(patient => {
+        const patientAppointments = appointments.value.filter(appointment => appointment.patient_id === patient.id);
+        return patientAppointments.every(appointment => {
           const appointmentStart = new Date(appointment.date_debut);
           const appointmentEnd = new Date(appointment.date_fin);
           return dateFin <= appointmentStart || dateDebut >= appointmentEnd;
@@ -212,9 +224,9 @@ export default {
         console.error("Erreur lors de l'ajout du rendez-vous :", error);
         Swal.fire({
           title: 'Erreur',
-          text: "Erreur lors de l'ajout du rendez-vous : " + error.message,
+          text: "Erreur lors de l'ajout du rendez-vous.",
           icon: 'error',
-          confirmButtonText: 'OK'
+          confirmButtonText: 'OK',
         });
       }
     };
@@ -226,17 +238,17 @@ export default {
     return {
       newAppointment,
       errorMessage,
-      patients,
-      medecins,
       availableMedecins,
+      availablePatients,
+      minDate,
       addAppointment,
       goToList,
-      minDate,
-      filterAvailableMedecins,
+      filterAvailablePatientsAndMedecins,
     };
-  },
+  }
 };
 </script>
+
 
 
 

@@ -87,12 +87,16 @@ export default {
     const specialties = computed(() => specialiteStore.specialites);
 
     const validateNom = () => {
-  const isAlpha = /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/.test(selectedSpecialty.value.nom);
+  const trimmedNom = selectedSpecialty.value.nom.trim(); 
+  const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/; 
 
-  const isLongEnough = selectedSpecialty.value.nom.length >= 3;
-  const isShortEnough = selectedSpecialty.value.nom.length <= 100;
+  const isAlpha = nameRegex.test(trimmedNom);
+  const isLongEnough = trimmedNom.length >= 3;
+  const isShortEnough = trimmedNom.length <= 100;
 
-  if (!isAlpha) {
+  if (!trimmedNom) {
+    nomError.value = 'Le nom est requis.';
+  } else if (!isAlpha) {
     nomError.value = 'Le nom doit contenir uniquement des lettres, espaces, apostrophes ou traits d’union.';
   } else if (!isLongEnough) {
     nomError.value = 'Le nom doit contenir au moins 3 caractères.';
@@ -102,7 +106,6 @@ export default {
     nomError.value = ''; 
   }
 };
-
 
     const viewSpecialty = (specialty) => {
       selectedSpecialty.value = { ...specialty };

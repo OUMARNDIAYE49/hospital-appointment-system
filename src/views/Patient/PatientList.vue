@@ -163,20 +163,31 @@ export default {
     const validateForm = () => {
   let isValid = true;
   errors.value = { nom: '', telephone: '', email: '' };
+const nameRegex = /^[a-zA-ZÀ-ÿ\s'-]+$/;
 
-  const nameRegex = /^[a-zA-ZÀ-ÿ\s]+$/;
-  if (!nameRegex.test(selectedPatient.value.nom)) {
-    errors.value.nom = "Le nom ne doit contenir que des lettres et des espaces.";
+if (!selectedPatient.value.nom || selectedPatient.value.nom.trim() === '') {
+  errors.value.nom = "Le nom est requis.";
+  isValid = false;
+} else {
+  const trimmedName = selectedPatient.value.nom.trim(); 
+  const isAlpha = nameRegex.test(trimmedName);
+  const isLongEnough = trimmedName.length >= 3;
+  const isNotTooLong = trimmedName.length <= 100;
+
+  if (!isAlpha) {
+    errors.value.nom = "Le nom ne doit contenir que des lettres, des espaces, des apostrophes ou des traits d’union.";
     isValid = false;
-  } else if (selectedPatient.value.nom.length < 3) {
+  } else if (!isLongEnough) {
     errors.value.nom = "Le nom doit contenir au moins 3 caractères.";
     isValid = false;
-  } else if (selectedPatient.value.nom.length > 100) {
+  } else if (!isNotTooLong) {
     errors.value.nom = "Le nom ne doit pas dépasser 100 caractères.";
     isValid = false;
+  } else {
+    errors.value.nom = ""; 
   }
+}
 
-  // Vérification : le téléphone doit être un nombre valide entre 8 et 20 chiffres
   const phoneRegex = /^[0-9]+$/;
   if (!phoneRegex.test(selectedPatient.value.telephone)) {
     errors.value.telephone = "Le téléphone doit contenir uniquement des chiffres.";
@@ -189,7 +200,6 @@ export default {
     isValid = false;
   }
 
-  // Vérification : l'email doit être valide et ne pas dépasser 50 caractères
   const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
   if (!emailRegex.test(selectedPatient.value.email)) {
     errors.value.email = "L'email doit être valide et se terminer par '@gmail.com'.";

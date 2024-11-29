@@ -165,14 +165,14 @@ export default {
       const existingUser = users.value.find(user => user.email === email && user.id !== userId);
       return !existingUser;
     };
-
     const validateNom = () => {
-  const isAlpha = /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/.test(selectedUser.value.nom);
-  const isLongEnough = selectedUser.value.nom.length >= 3;
-  const isNotTooLong = selectedUser.value.nom.length <= 100;
+  const trimmedNom = selectedUser.value.nom.trim(); // Supprime les espaces inutiles au début et à la fin
+  const isAlpha = /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/.test(trimmedNom);
+  const isLongEnough = trimmedNom.length >= 3;
+  const isNotTooLong = trimmedNom.length <= 100;
 
   if (!isAlpha) {
-    nomError.value = 'Le nom doit contenir uniquement des lettres, des espaces.';
+    nomError.value = 'Le nom doit contenir uniquement des lettres, des espaces, des apostrophes ou des traits d’union.';
   } else if (!isLongEnough) {
     nomError.value = 'Le nom doit comporter au moins 3 caractères.';
   } else if (!isNotTooLong) {
@@ -181,6 +181,7 @@ export default {
     nomError.value = ''; 
   }
 };
+
 
 const validateEmail = () => {
   const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
